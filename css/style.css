@@ -1,0 +1,147 @@
+:root{
+  /*var*/
+}
+
+@font-face{
+  font-family: "FontFamilyChoosed";
+  src: url(../font/AprilSans-Regular.otf) format("opentype");
+}
+
+a{
+  color: red;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+body{
+  background-image: url(../images/background.png);
+  font-family: "FontFamilyChoosed", serif;
+  font-size: 2em;
+}
+
+button{
+  background-color: black;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: "FontFamilyChoosed", serif;
+  font-size: 1em;
+  width: 100%;
+}
+button:hover{
+  background-color: red;
+  color: black;
+}
+
+h1{
+  font-size: 5em;
+  text-align: center;
+}
+
+hr{
+  border: 2px dotted black;
+}
+
+input{
+  background-color: inherit;
+  border: none;
+  font-family: "FontFamilyChoosed", serif;
+  font-size: 1em;
+  padding: inherit;
+  width: 100%;
+}
+
+label{
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+summary{
+  color: white;
+  cursor: pointer;
+  background-color: black;
+}
+summary:hover{
+  color: black;
+  background-color: red;
+}
+details > summary {
+  list-style: none;
+}
+summary:after {
+   content: "+";
+   color: red;
+   float: left;
+   font-weight: bold;
+   margin: -6px 6px 0 6px;
+}
+details[open] summary:after {
+   content: "-";
+}
+details:hover summary:after,  details[open]:hover summary:after{
+   color: white;
+}
+
+textarea{
+  min-width: 100%;
+  max-width: 100%;
+}
+
+
+#inscription, #lobby, #ingame, footer{
+  background-color: white;
+  border: 2px dotted black;
+  margin: auto;
+  padding: 4px;
+  width: 50%;
+}
+
+footer{
+  margin-top: 75px;
+  text-align: center;
+}
+
+#lobby, #ingame{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+#lobby form, #lobby div{
+  border: 2px solid black;
+  padding: 4px;
+  width: 47%;
+}
+
+#ingame div{
+  overflow: auto;
+  padding: 4px;
+}
+
+#head{
+  border: 2px solid black;
+  margin: 12px;
+  width: 100%;
+}
+#scoreboard{
+  border: 2px solid black;
+  width: 20%;
+}
+#draw{
+  border: 2px solid black;
+  width: 50%;
+}
+#chat{
+  border: 2px solid black;
+  width: 20%;
+}
+
+.hightlight{
+  color: red;
+}
+
+button:hover .hightlight{
+  color: white;
+  font-weight: bold;
+}

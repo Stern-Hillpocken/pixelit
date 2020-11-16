@@ -1,6 +1,39 @@
 <?php
 session_start();
+// Connexion à la base de données
+try {
+  $bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
+} catch(Exception $e) {
+        die('Erreur : '.$e->getMessage());
+}
+
+// Est-ce le/mon bon lobby ?
 if(isset($_SESSION['pseudo'])){
+  $reponse = $bdd->prepare('SELECT lobby FROM users WHERE pseudo=:currentPseudo');
+  $reponse->execute(array(':currentPseudo' => $_SESSION['pseudo']));
+  $userCurrentLobby = '';
+  while ($donnees = $reponse->fetch()){
+    $userCurrentLobby = $donnees['lobby'];
+  }
+  if($userCurrentLobby !== $_SERVER['QUERY_STRING']){
+    // On le rebascule sur son lobby
+    header('Location: ./?'.$userCurrentLobby);
+  }
+}
+
+// Est-on en jeu ?
+$lobbyStatus = '';
+if(isset($_SESSION['pseudo'])){
+  $reponse = $bdd->prepare('SELECT status FROM lobbies WHERE name=:currentLobby');
+  $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
+  while ($donnees = $reponse->fetch()){
+    $lobbyStatus = $donnees['status'];
+  }
+}
+
+
+// Display choice...
+if(isset($_SESSION['pseudo']) AND $lobbyStatus === 'game'){
 ////////////////////////////////////////////////////////////////////////////////
 // SESSION
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,18 +51,13 @@ if(isset($_SESSION['pseudo'])){
         <div id="head">tête</div>
         <div id="scoreboard">
           <?php
-          // Connexion à la base de données
-          try {
-          	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-          } catch(Exception $e) {
-                  die('Erreur : '.$e->getMessage());
-          }
           // Récupération des scores
-          $reponse = $bdd->query('SELECT pseudo, score FROM scoreboard ORDER BY score DESC');
+          $reponse = $bdd->prepare('SELECT pseudo, score FROM users WHERE lobby=:currentLobby ORDER BY score DESC');
+          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage
           while ($donnees = $reponse->fetch()){
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '<span class="hightlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
+              echo '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
             } else {
               echo '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
             }
@@ -41,18 +69,13 @@ if(isset($_SESSION['pseudo'])){
         <div id="draw">dessin</div>
         <div id="chat">
           <?php
-          // Connexion à la base de données
-          try {
-          	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-          } catch(Exception $e) {
-                  die('Erreur : '.$e->getMessage());
-          }
           // Récupération des 10 derniers messages
-          $reponse = $bdd->query('SELECT pseudo, message FROM minichat ORDER BY ID LIMIT 0, 10');
+          $reponse = $bdd->prepare('SELECT pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID LIMIT 0, 10');
+          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
           while ($donnees = $reponse->fetch()){
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '<span class="hightlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
+              echo '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
             } else {
               echo '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
             }
@@ -60,9 +83,14 @@ if(isset($_SESSION['pseudo'])){
           }
           $reponse->closeCursor();
           ?>
-          <form action="post/game_post.php" method="post">
+          <form action="post/msg_post.php" method="post">
             <input type="text" name="message" id="message" placeholder="Propose ici..." autofocus/>
-            <button type="submit"><span class="hightlight">>></span></button>
+            <input name="lobby" value=
+              <?php
+                echo '"'.$_SERVER['QUERY_STRING'].'"';
+              ?>
+            type="hidden" />
+            <button type="submit"><span class="highlight">>></span></button>
           </form>
         </div>
       </div>
@@ -85,21 +113,22 @@ if(isset($_SESSION['pseudo'])){
     <body>
       <h1>pixel it</h1>
       <div id="lobby">
-        <form action="post/game_post.php" method="post">
-          <label for="time">Temps (secondes) :</label><input id="time" name="time" type="number" value="30" min="5" max="99"/>
+        <form action="post/start_post.php" method="post">
+          <label for="timeDraw">Temps dessins (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="30" min="5" max="99"/>
+          <label for="timeAnswer">Temps propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="30" min="5" max="99"/>
           <label for="words">Mots :</label><textarea id="words" name="words" maxlength="65000" placeholder="Mots à faire deviner séparés par une virgule..."></textarea>
-          <button type="submit">Jouer <span class="hightlight">>></span></button>
+          <input name="lobby" value=
+            <?php
+              echo '"'.$_SERVER['QUERY_STRING'].'"';
+            ?>
+          type="hidden" />
+          <button type="submit">Jouer <span class="highlight">>></span></button>
         </form>
         <div>
           <?php
-          // Connexion à la base de données
-          try {
-          	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-          } catch(Exception $e) {
-            die('Erreur : '.$e->getMessage());
-          }
           // Récupération
-          $reponse = $bdd->query('SELECT pseudo FROM scoreboard ORDER BY ID');
+          $reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:currentLobby ORDER BY ID');
+          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage
           while ($donnees = $reponse->fetch()){
             if($donnees['pseudo'] === $_SESSION['pseudo']){
@@ -111,7 +140,7 @@ if(isset($_SESSION['pseudo'])){
           $reponse->closeCursor();
           ?>
         </div>
-        <p>Lien vers le lobby : <span class="hightlight">
+        <p>Lien vers le lobby : <span class="highlight">
           <?php echo $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']; ?>
         </span></p>
     </div>
@@ -138,7 +167,7 @@ if(isset($_SESSION['pseudo'])){
           <p>Règles...TODO</p>
           <hr/>
         </details>
-        <form action="post/game_post.php" method="post">
+        <form action="post/login_post.php" method="post">
           <input type="text" name="pseudo" id="pseudo" placeholder="Pseudo ici..." autofocus/>
           <input name="lobby" value=
             <?php
@@ -146,11 +175,11 @@ if(isset($_SESSION['pseudo'])){
             ?>
           type="hidden" />
           <br/>
-          <button type="submit">Jouer <span class="hightlight">>></span></button>
+          <button type="submit">Jouer <span class="highlight">>></span></button>
         </form>
     </div>
     </body>
-    <footer>Code source sur github <a href="">>></a></footer>
+    <footer>Code source sur github <a href="https://github.com/Stern-Hillpocken/pixelit">>></a></footer>
 </html>
 <?php
 }

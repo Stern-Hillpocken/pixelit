@@ -20,14 +20,22 @@ if(strlen($lobby) === 8){//TODO:et que le lobby existe et qu'on est le top membr
 	$timeAnswer = $_POST['timeAnswer'];
 	if($timeAnswer === '' || $timeAnswer < 5 || !is_int($timeAnswer)){$timeAnswer = 5;}
 
+	// Préparer les mots
+	$words = $_POST['words'];
+	//TODO
+
 	// Passer en game
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'game\', timeDraw = :timeDraw, timeAnswer = :timeAnswer, answer = :answer  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words, startTime = :startTime  WHERE name = :currentLobby');
 	$req->execute(array(
 	  'currentLobby' => $lobby,
 		'timeDraw' => $timeDraw,
 		'timeAnswer' => $timeAnswer,
-		'answer' => 'motAFaireDeviner'
+		'words' => $words,
+		'startTime' => date("Y-m-d H:i:s")
 	  ));
+
+	// Commencer le round
+	//TODO
 }
 // Actualiser
 header('Location: ./../?'.$lobby);

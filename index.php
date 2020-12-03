@@ -9,11 +9,12 @@ try {
 
 // Est-ce le/mon bon lobby ?
 if(isset($_SESSION['pseudo'])){
-  $reponse = $bdd->prepare('SELECT lobby FROM users WHERE pseudo=:currentPseudo');
+  $reponse = $bdd->prepare('SELECT lobby, grid FROM users WHERE pseudo=:currentPseudo');
   $reponse->execute(array(':currentPseudo' => $_SESSION['pseudo']));
   $userCurrentLobby = '';
   while ($donnees = $reponse->fetch()){
     $userCurrentLobby = $donnees['lobby'];
+    $grid = $donnees['grid'];
   }
   if($userCurrentLobby !== $_SERVER['QUERY_STRING']){
     // On le rebascule sur son lobby
@@ -31,9 +32,15 @@ if(isset($_SESSION['pseudo'])){
   }
 }
 
+// Grid
+$emptyGrid = '';
+for($i = 0; $i < 81; $i++){
+  $emptyGrid .= '0';
+}
+
 
 // Display choice...
-if(isset($_SESSION['pseudo']) AND $lobbyStatus === 'game'){
+if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus === 'guessing')){
 ////////////////////////////////////////////////////////////////////////////////
 // SESSION
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,135 +59,153 @@ if(isset($_SESSION['pseudo']) AND $lobbyStatus === 'game'){
         <div id="scoreboard">
           <?php
           // Récupération des scores
-          $reponse = $bdd->prepare('SELECT pseudo, score FROM users WHERE lobby=:currentLobby ORDER BY score DESC');
+          $reponse = $bdd->prepare('SELECT pseudo, score, team FROM users WHERE lobby=:currentLobby ORDER BY score DESC');
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage
           while ($donnees = $reponse->fetch()){
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
+              echo '['.$donnees['team'].']'.'<span class="highlight">'. htmlspecialchars($donnees['pseudo']).' :</span> ';
             } else {
-              echo '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
+              echo '['.$donnees['team'].']'.htmlspecialchars($donnees['pseudo']).' : ';
             }
             echo $donnees['score'] . '<br/>';
           }
           $reponse->closeCursor();
           ?>
         </div>
-        <div id="draw">dessin</div>
+        <div id="draw">
+          <div id="painting-options">
+          </div>
+          <table id="painting">
+          </table>
+          <div id="color-points"></div>
+          <form action="post/painting_post.php" method="post">
+            <input id="sended-painting" name="sended-painting" value="" type="hidden"/>
+            <button type="submit">Envoyer <span class="highlight">>></span></button>
+          </form>
+        </div>
+
+        <script type="text/javascript">
+          let colorPoints;
+          let colorInt;
+          let colorValue = ['white', 'black', 'red'];
+          let colorPool;
+          let painting;
+          clearPainting();
+
+          function clearPainting(){
+            coloPoints = 0;
+            colorInt = 1;
+            colorPool = [81,20,1];
+
+            painting = '';
+            for(let i = 0; i < 81; i++){
+              painting += '0';
+            }
+            updatePainting();
+          }
+
+          function updatePainting(){
+            //options
+            let optionsTable = '<img alt="erase" src="images/erase.png"/ onclick="clearPainting()">';
+            for(let i = 0; i < 3; i++){
+              optionsTable += ' <img alt="'+colorValue[i]+'-color" src="images/'+colorValue[i]+'-color.png" onclick="changeColor('+i+')"';
+              if(i === colorInt){
+                optionsTable += ' style="outline: 2px solid red"';
+              }
+              optionsTable += '/>';
+              if(i > 0){
+                optionsTable += '<span class="color-quantity">x'+colorPool[i]+'</span>';
+              }
+            }
+            //table
+            let paintingTable = '';
+            for(let r = 0; r < 9; r++){
+              paintingTable += '<tr>';
+              for(let c = 0; c < 9; c++){
+                paintingTable += '<td style="background-color:'+colorValue[painting[(r*9+c)]]+'" onclick="paintColor('+(r*9+c)+')"></td>';
+              }
+              paintingTable += '</tr>';
+            }
+            //points
+            colorPoints = (81-colorPool[0])*0+(20-colorPool[1])*1+(1-colorPool[2])*4;
+            //
+            document.getElementById("painting-options").innerHTML = optionsTable;
+            document.getElementById("painting").innerHTML = paintingTable;
+            document.getElementById("color-points").innerHTML = colorPoints+' pt';
+            if(colorPoints >= 2){document.getElementById("color-points").innerHTML += 's';}
+            document.getElementById("sended-painting").value = painting;
+          }
+
+          function paintColor(pos){
+            if(colorPool[colorInt] > 0){
+              //gain color
+              if(painting[pos] === '1'){
+                colorPool[1] ++;
+              } else if (painting[pos] === '2'){
+                colorPool[2] ++;
+              } else {
+                colorPool[0] ++;
+              }
+              //loose color
+              painting = painting.substring(0, pos)+colorInt+painting.substring(pos+1, painting.length);
+              colorPool[colorInt] --;
+              updatePainting();
+            }
+          }
+
+          function changeColor(i){
+            colorInt = i;
+            updatePainting();
+          }
+
+          updatePainting();
+        </script>
+
         <div id="chat">
           <?php
           // Récupération des 10 derniers messages
-          $reponse = $bdd->prepare('SELECT pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID LIMIT 0, 10');
+          $reponse = $bdd->prepare('SELECT pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID DESC LIMIT 0, 10');
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
+          $chatText = '';
           while ($donnees = $reponse->fetch()){
+            $strTxt = '';
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
+              $strTxt = '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
             } else {
-              echo '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
+              $strTxt = '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
             }
-            echo htmlspecialchars($donnees['message']) . '<br/>';
+            $strTxt .= htmlspecialchars($donnees['message']) . '<br/>';
+            $chatText = $strTxt.$chatText;
           }
           $reponse->closeCursor();
+          echo $chatText;
           ?>
           <form action="post/msg_post.php" method="post">
-            <input type="text" name="message" id="message" placeholder="Propose ici..." autofocus/>
+            <input type="text" name="message" placeholder="Propose ici..." autofocus/>
             <input name="lobby" value=
               <?php
                 echo '"'.$_SERVER['QUERY_STRING'].'"';
               ?>
             type="hidden" />
-            <button type="submit"><span class="highlight">>></span></button>
+            <button type="submit"
+            <?php
+              if($grid === $emptyGrid){
+                echo 'DISABLED';
+              }
+            ?>
+            ><span class="highlight">>></span></button>
           </form>
         </div>
+
       </div>
     </body>
 </html>
 <?php
 } else if (isset($_SESSION['pseudo'])) {
-////////////////////////////////////////////////////////////////////////////////
-// LOBBY
-////////////////////////////////////////////////////////////////////////////////
-?>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="icon" type="image/png" href="images/favicon.png" />
-        <title>pixel it : en attente...</title>
-    </head>
-    <body>
-      <h1>pixel it</h1>
-      <div id="lobby">
-        <form action="post/start_post.php" method="post">
-          <label for="timeDraw">Temps dessins (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="30" min="5" max="99"/>
-          <label for="timeAnswer">Temps propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="30" min="5" max="99"/>
-          <label for="words">Mots :</label><textarea id="words" name="words" maxlength="65000" placeholder="Mots à faire deviner séparés par une virgule..."></textarea>
-          <input name="lobby" value=
-            <?php
-              echo '"'.$_SERVER['QUERY_STRING'].'"';
-            ?>
-          type="hidden" />
-          <button type="submit">Jouer <span class="highlight">>></span></button>
-        </form>
-        <div>
-          <?php
-          // Récupération
-          $reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:currentLobby ORDER BY ID');
-          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
-          // Affichage
-          while ($donnees = $reponse->fetch()){
-            if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '<span class="highlight">'.htmlspecialchars($donnees['pseudo']).'</span> ';
-            } else {
-              echo '<u>'.htmlspecialchars($donnees['pseudo']).'</u> ';
-            }
-          }
-          $reponse->closeCursor();
-          ?>
-        </div>
-        <p>Lien vers le lobby : <span class="highlight">
-          <?php echo $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']; ?>
-        </span></p>
-    </div>
-    </body>
-</html>
-<?php
+  include('lobby.php');
 } else {
-////////////////////////////////////////////////////////////////////////////////
-// NOT SESSION
-////////////////////////////////////////////////////////////////////////////////
-?>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="icon" type="image/png" href="images/favicon.png" />
-        <title>pixel it : joue à deviner le pixelart</title>
-    </head>
-    <body>
-      <h1>pixel it</h1>
-      <div id="inscription">
-        <details><summary>Comment jouer ?</summary>
-          <p>Règles...TODO</p>
-          <hr/>
-        </details>
-        <form action="post/login_post.php" method="post">
-          <input type="text" name="pseudo" id="pseudo" placeholder="Pseudo ici..." autofocus/>
-          <input name="lobby" value=
-            <?php
-              echo '"'.$_SERVER['QUERY_STRING'].'"';
-            ?>
-          type="hidden" />
-          <br/>
-          <button type="submit">Jouer <span class="highlight">>></span></button>
-        </form>
-    </div>
-    </body>
-    <footer>Code source sur github <a href="https://github.com/Stern-Hillpocken/pixelit">>></a></footer>
-</html>
-<?php
+  include('welcome.php');
 }
 ?>

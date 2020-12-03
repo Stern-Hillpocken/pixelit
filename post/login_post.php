@@ -19,6 +19,9 @@ if(isset($_POST['pseudo'])){
   while($pseudo[0] === ' '){
     $pseudo = substr($pseudo, 1, strlen($pseudo)-1);
   }
+	if(strlen($pseudo) > 25){
+		$pseudo = substr($pseudo, 0, 25);
+	}
   // S'assurer qu'il n'est pas dans la BDD
   // TODO
   // Check
@@ -29,8 +32,8 @@ if(isset($_POST['pseudo'])){
       $emptyGrid.='0';
     }
     // Insertion du message à l'aide d'une requête préparée
-    $req = $bdd->prepare('INSERT INTO users (pseudo, lobby, score, grid, guess) VALUES(?, ?, ?, ?, ?)');
-    $req->execute(array($_SESSION['pseudo'], '', 0, $emptyGrid, ''));
+    $req = $bdd->prepare('INSERT INTO users (pseudo, lobby, score, grid, guess, team) VALUES(?, ?, ?, ?, ?, ?)');
+    $req->execute(array($_SESSION['pseudo'], '', 0, $emptyGrid, '', 0));
   }
 }
 
@@ -49,14 +52,20 @@ if($lobby === '' || strlen($lobby) !== 8){
 	// S'assurer qu'il n'est pas dans la BDD
 	//TODO
 	// Créer dans la BDD
-	$req = $bdd->prepare('INSERT INTO lobbies (name, status, timeDraw, timeAnswer, answer) VALUES(?, ?, ?, ?, ?)');
-	$req->execute(array($lobby, 'lobby', 0, 0, ''));
+	$time = date("Y-m-d H:i:s");
+	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+	$req->execute(array($lobby, 'lobby', 0, 0, 0, '', 1, $time, '', $time));
 }
+
 // Y mettre le joueur
-$req = $bdd->prepare('UPDATE users SET lobby = :lobby WHERE pseudo = :pseudo');
-$req->execute(array(
-  'lobby' => $lobby,
-  'pseudo' => $_SESSION['pseudo']
-  ));
-header('Location: ./../?'.$lobby);
+if(isset($_SESSION['pseudo'])){
+	$req = $bdd->prepare('UPDATE users SET lobby = :lobby WHERE pseudo = :pseudo');
+	$req->execute(array(
+	  'lobby' => $lobby,
+	  'pseudo' => $_SESSION['pseudo']
+	  ));
+	header('Location: ./../?'.$lobby);
+} else {
+	header('Location: ./../');
+}
 ?>

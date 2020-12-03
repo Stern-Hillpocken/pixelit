@@ -16,6 +16,7 @@ if(isset($_SESSION['pseudo'])){
 	$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
 	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_POST['lobby']));
 }
+
 // Actualiser
 header('Location: ./../?'.$_POST['lobby']);
 ?>

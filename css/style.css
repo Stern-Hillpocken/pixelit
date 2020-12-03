@@ -7,6 +7,10 @@
   src: url(../font/AprilSans-Regular.otf) format("opentype");
 }
 
+[DISABLED]{
+  cursor: not-allowed;
+}
+
 a{
   color: red;
   font-weight: bold;
@@ -31,6 +35,9 @@ button{
 button:hover{
   background-color: red;
   color: black;
+}
+button[DISABLED]{
+  opacity: 0.2;
 }
 
 h1{
@@ -93,7 +100,7 @@ textarea{
   border: 2px dotted black;
   margin: auto;
   padding: 4px;
-  width: 50%;
+  width: 80%;
 }
 
 footer{
@@ -105,7 +112,7 @@ footer{
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: space-between;
 }
 
 #lobby form, #lobby div{
@@ -121,7 +128,8 @@ footer{
 
 #head{
   border: 2px solid black;
-  margin: 12px;
+  margin-bottom: 12px;
+  text-align: center;
   width: 100%;
 }
 #scoreboard{
@@ -134,14 +142,43 @@ footer{
 }
 #chat{
   border: 2px solid black;
-  width: 20%;
+  width: 25%;
+}
+
+
+#painting-options{
+  text-align: center;
+}
+#painting-options img{
+  image-rendering: crisp-edges;
+  width: 64px;
+}
+/*.color-quantity{
+  position: absolute;
+  color: blue;
+  width: 64px;
+  left: 64px;
+  text-align: center;
+}*/
+
+#painting{
+  border-collapse: collapse;
+  margin: auto;
+}
+#painting td{
+  border: 1px solid black;
+  height: 32px;
+  width: 32px;
+}
+
+#color-points{
+  text-align: center;
 }
 
 .highlight{
   color: red;
 }
 
-button:hover .hightlight{
+button:hover .highlight{
   color: white;
-  font-weight: bold;
 }

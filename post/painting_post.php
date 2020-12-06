@@ -31,6 +31,7 @@ if(isset($_SESSION['pseudo']) && isset($_POST['sended-painting'])){
 	  'pseudo' => $_SESSION['pseudo'],
 		'grid' => $paint
 	  ));
+	$req->closeCursor();
 }
 // Actualiser
 header('Location: ./../?');

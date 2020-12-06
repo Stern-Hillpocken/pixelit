@@ -41,6 +41,7 @@ button[DISABLED]{
 }
 
 h1{
+  margin: inherit;
   font-size: 5em;
   text-align: center;
 }

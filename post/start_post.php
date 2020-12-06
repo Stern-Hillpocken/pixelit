@@ -9,25 +9,38 @@ catch(Exception $e)
 {
         die('Erreur : '.$e->getMessage());
 }
+if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
+	$reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:lobby ORDER BY ID LIMIT 0,1');
+	$reponse->execute(array(':lobby' => $_SESSION['lobby']));
+	while ($donnees = $reponse->fetch()){
+		$host = $donnees['pseudo'];
+	}
+	$reponse->closeCursor();
+}
 
-// MAJ des infos du lobby
-$lobby = $_POST['lobby'];
-if(strlen($lobby) === 8){//TODO:et que le lobby existe et qu'on est le top membre
+if($_SESSION['pseudo'] === $host){
 
-	// Préparer le temps
+	// Préparer les rounds et le temps
+	$rounds = $_POST['rounds'];
+	if($rounds === '' || $rounds < 1 || !is_int($rounds)){$rounds = 3;}
 	$timeDraw = $_POST['timeDraw'];
 	if($timeDraw === '' || $timeDraw < 5 || !is_int($timeDraw)){$timeDraw = 5;}
 	$timeAnswer = $_POST['timeAnswer'];
 	if($timeAnswer === '' || $timeAnswer < 5 || !is_int($timeAnswer)){$timeAnswer = 5;}
 
-	// Préparer les mots
+	// Préparer les mots, plus de 8 mots
 	$words = $_POST['words'];
-	//TODO
+	preg_match_all('/(\w+\s*\w+)(,|$)/', $words, $out_preg);
+	if(count($out_preg[1]) < 8 OR (isset($_POST['add-words']) AND $_POST['add-words'] === 'checked')){
+		$words .= ', champignon, bamboo, pinocchio, serpent, main, oeil, stylo, souris';
+	}
+	$words = strtolower($words);
 
 	// Passer en game
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words, startTime = :startTime  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', rounds = :rounds, timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words, startTime = :startTime  WHERE name = :currentLobby');
 	$req->execute(array(
-	  'currentLobby' => $lobby,
+	  'currentLobby' => $_SESSION['lobby'],
+		'rounds' => $rounds,
 		'timeDraw' => $timeDraw,
 		'timeAnswer' => $timeAnswer,
 		'words' => $words,
@@ -35,8 +48,8 @@ if(strlen($lobby) === 8){//TODO:et que le lobby existe et qu'on est le top membr
 	  ));
 
 	// Commencer le round
-	//TODO
+	include 'newround_post.php';
 }
 // Actualiser
-header('Location: ./../?'.$lobby);
+header('Location: ./../?'.$_SESSION['lobby']);
 ?>

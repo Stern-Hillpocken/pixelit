@@ -34,6 +34,7 @@ if(isset($_POST['pseudo'])){
     // Insertion du message à l'aide d'une requête préparée
     $req = $bdd->prepare('INSERT INTO users (pseudo, lobby, score, grid, guess, team) VALUES(?, ?, ?, ?, ?, ?)');
     $req->execute(array($_SESSION['pseudo'], '', 0, $emptyGrid, '', 0));
+		$req->closeCursor();
   }
 }
 
@@ -55,6 +56,7 @@ if($lobby === '' || strlen($lobby) !== 8){
 	$time = date("Y-m-d H:i:s");
 	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 	$req->execute(array($lobby, 'lobby', 0, 0, 0, '', 1, $time, '', $time));
+	$req->closeCursor();
 }
 
 // Y mettre le joueur
@@ -64,7 +66,9 @@ if(isset($_SESSION['pseudo'])){
 	  'lobby' => $lobby,
 	  'pseudo' => $_SESSION['pseudo']
 	  ));
-	header('Location: ./../?'.$lobby);
+	$req->closeCursor();
+	$_SESSION['lobby'] = $lobby;
+	header('Location: ./../?'.$_SESSION['lobby']);
 } else {
 	header('Location: ./../');
 }

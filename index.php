@@ -7,19 +7,24 @@ try {
         die('Erreur : '.$e->getMessage());
 }
 
-// Est-ce le/mon bon lobby ?
-if(isset($_SESSION['pseudo'])){
-  $reponse = $bdd->prepare('SELECT lobby, grid FROM users WHERE pseudo=:currentPseudo');
-  $reponse->execute(array(':currentPseudo' => $_SESSION['pseudo']));
-  $userCurrentLobby = '';
-  while ($donnees = $reponse->fetch()){
-    $userCurrentLobby = $donnees['lobby'];
+//GRID et HOST
+if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
+	$reponse = $bdd->prepare('SELECT grid FROM users WHERE pseudo=:pseudo');
+	$reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
+	while ($donnees = $reponse->fetch()){
     $grid = $donnees['grid'];
+	}
+  if($_SESSION['lobby'] !== $_SERVER['QUERY_STRING']){// On le rebascule sur son lobby
+    header('Location: ./?'.$_SESSION['lobby']);
   }
-  if($userCurrentLobby !== $_SERVER['QUERY_STRING']){
-    // On le rebascule sur son lobby
-    header('Location: ./?'.$userCurrentLobby);
-  }
+	$reponse->closeCursor();
+
+	$reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:lobby ORDER BY ID LIMIT 0,1');
+	$reponse->execute(array(':lobby' => $_SESSION['lobby']));
+	while ($donnees = $reponse->fetch()){
+		$host = $donnees['pseudo'];
+	}
+	$reponse->closeCursor();
 }
 
 // Est-on en jeu ?
@@ -30,6 +35,7 @@ if(isset($_SESSION['pseudo'])){
   while ($donnees = $reponse->fetch()){
     $lobbyStatus = $donnees['status'];
   }
+  $reponse->closeCursor();
 }
 
 // Grid
@@ -51,11 +57,52 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/style.css" />
         <link rel="icon" type="image/png" href="images/favicon.png" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script>
+        //Check is $lobbyStatus change --> refresh
+        $(document).ready(function(){
+          function loopCheckLobbyStatus(){
+            $.ajax({
+                url : 'php/lobby-status.php',
+                type : 'GET',
+                data : false,
+                success : function(realStatus){
+                    if(realStatus !== '<?php echo $lobbyStatus; ?>'){
+                      location.reload();
+                    }
+                }
+            });
+            setTimeout(loopCheckLobbyStatus, 1000);
+          }
+          loopCheckLobbyStatus();
+        });
+        </script>
         <title>pixel it - en jeu !</title>
     </head>
     <body>
       <div id="ingame">
-        <div id="head">tête</div>
+        <div id="head">
+          <?php
+          // Récupération des mots à deviner
+          $reponse = $bdd->prepare('SELECT currentWords FROM lobbies WHERE name=:currentLobby');
+          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
+          $currentWords;
+          while ($donnees = $reponse->fetch()){
+            $currentWords = $donnees['currentWords'];
+          }
+          $reponse->closeCursor();
+          preg_match_all('/(\w+\s*\w+)(,|$)/', $currentWords, $out_preg);
+          $currentWordsArray = $out_preg[1];
+          // Récupération des scores
+          $reponse = $bdd->prepare('SELECT team FROM users WHERE pseudo=:pseudo ');
+          $reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
+          // Affichage
+          while ($donnees = $reponse->fetch()){
+            echo $currentWordsArray[$donnees['team']];
+          }
+          $reponse->closeCursor();
+          ?>
+        </div>
         <div id="scoreboard">
           <?php
           // Récupération des scores
@@ -85,82 +132,7 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           </form>
         </div>
 
-        <script type="text/javascript">
-          let colorPoints;
-          let colorInt;
-          let colorValue = ['white', 'black', 'red'];
-          let colorPool;
-          let painting;
-          clearPainting();
-
-          function clearPainting(){
-            coloPoints = 0;
-            colorInt = 1;
-            colorPool = [81,20,1];
-
-            painting = '';
-            for(let i = 0; i < 81; i++){
-              painting += '0';
-            }
-            updatePainting();
-          }
-
-          function updatePainting(){
-            //options
-            let optionsTable = '<img alt="erase" src="images/erase.png"/ onclick="clearPainting()">';
-            for(let i = 0; i < 3; i++){
-              optionsTable += ' <img alt="'+colorValue[i]+'-color" src="images/'+colorValue[i]+'-color.png" onclick="changeColor('+i+')"';
-              if(i === colorInt){
-                optionsTable += ' style="outline: 2px solid red"';
-              }
-              optionsTable += '/>';
-              if(i > 0){
-                optionsTable += '<span class="color-quantity">x'+colorPool[i]+'</span>';
-              }
-            }
-            //table
-            let paintingTable = '';
-            for(let r = 0; r < 9; r++){
-              paintingTable += '<tr>';
-              for(let c = 0; c < 9; c++){
-                paintingTable += '<td style="background-color:'+colorValue[painting[(r*9+c)]]+'" onclick="paintColor('+(r*9+c)+')"></td>';
-              }
-              paintingTable += '</tr>';
-            }
-            //points
-            colorPoints = (81-colorPool[0])*0+(20-colorPool[1])*1+(1-colorPool[2])*4;
-            //
-            document.getElementById("painting-options").innerHTML = optionsTable;
-            document.getElementById("painting").innerHTML = paintingTable;
-            document.getElementById("color-points").innerHTML = colorPoints+' pt';
-            if(colorPoints >= 2){document.getElementById("color-points").innerHTML += 's';}
-            document.getElementById("sended-painting").value = painting;
-          }
-
-          function paintColor(pos){
-            if(colorPool[colorInt] > 0){
-              //gain color
-              if(painting[pos] === '1'){
-                colorPool[1] ++;
-              } else if (painting[pos] === '2'){
-                colorPool[2] ++;
-              } else {
-                colorPool[0] ++;
-              }
-              //loose color
-              painting = painting.substring(0, pos)+colorInt+painting.substring(pos+1, painting.length);
-              colorPool[colorInt] --;
-              updatePainting();
-            }
-          }
-
-          function changeColor(i){
-            colorInt = i;
-            updatePainting();
-          }
-
-          updatePainting();
-        </script>
+        <script type="text/javascript" src="js/painting.js"></script>
 
         <div id="chat">
           <?php
@@ -191,9 +163,7 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
             type="hidden" />
             <button type="submit"
             <?php
-              if($grid === $emptyGrid){
-                echo 'DISABLED';
-              }
+              if($grid === $emptyGrid){echo 'DISABLED';}
             ?>
             ><span class="highlight">>></span></button>
           </form>

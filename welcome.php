@@ -25,5 +25,6 @@
         </form>
     </div>
     </body>
-    <footer>Code source sur github <a href="https://github.com/Stern-Hillpocken/pixelit">>></a></footer>
+    <footer>Version alpha !<br/>
+      Code source sur github <a href="https://github.com/Stern-Hillpocken/pixelit">>></a></footer>
 </html>

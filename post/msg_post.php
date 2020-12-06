@@ -15,6 +15,7 @@ if(isset($_SESSION['pseudo'])){
 	// Insertion du message à l'aide d'une requête préparée
 	$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
 	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_POST['lobby']));
+	$req->closeCursor();
 }
 
 // Actualiser

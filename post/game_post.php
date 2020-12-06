@@ -7,7 +7,7 @@ try
 }
 catch(Exception $e)
 {
-        die('Erreur : '.$e->getMessage());
+  die('Erreur : '.$e->getMessage());
 }
 
 if(isset($_SESSION['pseudo'])){
@@ -15,6 +15,7 @@ if(isset($_SESSION['pseudo'])){
 	// Insertion du message à l'aide d'une requête préparée
 	$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
 	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_POST['lobby']));
+	$req->closeCursor();
 
 } else {
 	// Login
@@ -36,6 +37,7 @@ if(isset($_SESSION['pseudo'])){
 			// Insertion du message à l'aide d'une requête préparée
 			$req = $bdd->prepare('INSERT INTO users (pseudo, lobby, score, grid, guess) VALUES(?, ?, ?, ?, ?)');
 			$req->execute(array($_SESSION['pseudo'], '', 0, $emptyGrid, ''));
+			$req->closeCursor();
 		}
 	}
 }
@@ -59,12 +61,14 @@ if($_POST['lobby'] === '' || strlen($_POST['lobby']) !== 8){
 	// Créer dans la BDD
 	$req = $bdd->prepare('INSERT INTO lobbies (name, status, timeDraw, timeAnswer, answer) VALUES(?, ?, ?, ?, ?)');
 	$req->execute(array($newlobby, 'game', $timeDraw, $timeAnswer, ''));
+	$req->closeCursor();
 	// Y mettre le joueur
 	$req = $bdd->prepare('UPDATE users SET lobby = :newLobby WHERE pseudo = :pseudo');
 	$req->execute(array(
 		'newLobby' => $newlobby,
 		'pseudo' => $_SESSION['pseudo']
 		));
+	$req->closeCursor();
   header('Location: ./../?'.$newlobby);
 } else {
 	// Y mettre le joueur
@@ -73,6 +77,7 @@ if($_POST['lobby'] === '' || strlen($_POST['lobby']) !== 8){
 		'newLobby' => $_POST['lobby'],
 		'pseudo' => $_SESSION['pseudo']
 		));
+	$req->closeCursor();
 	header('Location: ./../?'.$_POST['lobby']);
 }
 ?>

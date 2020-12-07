@@ -139,34 +139,61 @@ footer{
 }
 #draw{
   border: 2px solid black;
-  width: 50%;
+  width: 55%;
+  text-align: center;
 }
-#chat{
+#chatbox{
   border: 2px solid black;
-  width: 25%;
+  width: 20%;
+}
+#chatbox p{
+  margin: inherit;
 }
 
+#head{
+  font-size: 2em;
+  overflow: hidden;
+  padding: 0px;
+}
+#clock{
+  display: inline;
+  position: relative;
+  padding: 0px;
+}
+#clock img{
+  image-rendering: crisp-edges;
+  width: 64px;
+}
+#time{
+  color: red;
+  position: absolute;
+  height: 64px;
+  width: 64px;
+  left: 0px;
+  top: -32px;
+}
 
 #painting-options{
   text-align: center;
+  position: relative;
 }
 #painting-options img{
   image-rendering: crisp-edges;
   width: 64px;
 }
-/*.color-quantity{
-  position: absolute;
-  color: blue;
-  width: 64px;
-  left: 64px;
-  text-align: center;
-}*/
+.color-quantity{
+color: white;
+position: absolute;
+width: 64px;
+left: 0px;
+top: -32px;
+}
 
-#painting{
+#painting, .painting-show{
   border-collapse: collapse;
   margin: auto;
 }
-#painting td{
+#painting td, .painting-show td{
   border: 1px solid black;
   height: 32px;
   width: 32px;
@@ -174,6 +201,10 @@ footer{
 
 #color-points{
   text-align: center;
+}
+
+.artist{
+  text-decoration: underline;
 }
 
 .highlight{

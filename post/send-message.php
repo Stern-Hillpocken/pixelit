@@ -11,13 +11,12 @@ catch(Exception $e)
 }
 
 // Envoyer un message
-if(isset($_SESSION['pseudo'])){
+if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 	// Insertion du message à l'aide d'une requête préparée
 	$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
-	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_POST['lobby']));
+	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_SESSION['lobby']));
 	$req->closeCursor();
+	echo 'message sended';
 }
 
-// Actualiser
-header('Location: ./../?'.$_POST['lobby']);
 ?>

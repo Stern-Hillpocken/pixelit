@@ -5,25 +5,7 @@
         <link rel="stylesheet" href="css/style.css" />
         <link rel="icon" type="image/png" href="images/favicon.png" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script>
-        //Check is $lobbyStatus change --> refresh
-        $(document).ready(function(){
-          function loopCheckLobbyStatus(){
-            $.ajax({
-                url : 'php/lobby-status.php',
-                type : 'GET',
-                data : false,
-                success : function(realStatus){
-                    if(realStatus !== '<?php echo $lobbyStatus; ?>'){
-                      location.reload();
-                    }
-                }
-            });
-            setTimeout(loopCheckLobbyStatus, 1000);
-          }
-          loopCheckLobbyStatus();
-        });
-        </script>
+        <?php include 'ajax/check-lobby-status.php'; ?>
         <title>pixel it : en attente...</title>
     </head>
     <body>
@@ -35,12 +17,12 @@
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>
           />
-          <label for="timeDraw">Temps dessins (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="30" min="5" max="99"
+          <label for="timeDraw">Temps pour finir son dessin (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="10" min="5" max="99"
           <?php
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>
           />
-          <label for="timeAnswer">Temps propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="30" min="5" max="99"
+          <label for="timeAnswer">Temps pour les propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="10" min="5" max="99"
           <?php
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>

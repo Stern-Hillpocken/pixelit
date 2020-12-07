@@ -58,50 +58,38 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <link rel="stylesheet" href="css/style.css" />
         <link rel="icon" type="image/png" href="images/favicon.png" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script>
-        //Check is $lobbyStatus change --> refresh
-        $(document).ready(function(){
-          function loopCheckLobbyStatus(){
-            $.ajax({
-                url : 'php/lobby-status.php',
-                type : 'GET',
-                data : false,
-                success : function(realStatus){
-                    if(realStatus !== '<?php echo $lobbyStatus; ?>'){
-                      location.reload();
-                    }
-                }
-            });
-            setTimeout(loopCheckLobbyStatus, 1000);
-          }
-          loopCheckLobbyStatus();
-        });
-        </script>
+        <?php include 'ajax/check-lobby-status.php'; ?>
+        <?php include 'ajax/check-startTime-value.php'; ?>
         <title>pixel it - en jeu !</title>
     </head>
     <body>
       <div id="ingame">
         <div id="head">
           <?php
-          // Récupération des mots à deviner
-          $reponse = $bdd->prepare('SELECT currentWords FROM lobbies WHERE name=:currentLobby');
-          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
-          $currentWords;
-          while ($donnees = $reponse->fetch()){
-            $currentWords = $donnees['currentWords'];
+          if($lobbyStatus === 'drawing'){
+            // Récupération des mots à deviner
+            $reponse = $bdd->prepare('SELECT currentWords FROM lobbies WHERE name=:currentLobby');
+            $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
+            $currentWords;
+            while ($donnees = $reponse->fetch()){
+              $currentWords = $donnees['currentWords'];
+            }
+            $reponse->closeCursor();
+            preg_match_all('/(\w+\s*\w+)(,|$)/', $currentWords, $out_preg);
+            $currentWordsArray = $out_preg[1];
+            // Récupération des scores
+            $reponse = $bdd->prepare('SELECT team FROM users WHERE pseudo=:pseudo ');
+            $reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
+            // Affichage
+            while ($donnees = $reponse->fetch()){
+              echo $currentWordsArray[$donnees['team']];
+            }
+            $reponse->closeCursor();
           }
-          $reponse->closeCursor();
-          preg_match_all('/(\w+\s*\w+)(,|$)/', $currentWords, $out_preg);
-          $currentWordsArray = $out_preg[1];
-          // Récupération des scores
-          $reponse = $bdd->prepare('SELECT team FROM users WHERE pseudo=:pseudo ');
-          $reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
-          // Affichage
-          while ($donnees = $reponse->fetch()){
-            echo $currentWordsArray[$donnees['team']];
-          }
-          $reponse->closeCursor();
           ?>
+          <span id="clock">
+            <img src="images/clock.png"/><span id="time"></span>
+          </span>
         </div>
         <div id="scoreboard">
           <?php
@@ -120,54 +108,91 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           $reponse->closeCursor();
           ?>
         </div>
+
+
         <div id="draw">
-          <div id="painting-options">
-          </div>
+        <?php if($grid === $emptyGrid){ ?>
+          <div id="painting-options"></div>
           <table id="painting">
           </table>
           <div id="color-points"></div>
-          <form action="post/painting_post.php" method="post">
+          <form id="sended-painting-form" action="post/painting_post.php" method="post">
             <input id="sended-painting" name="sended-painting" value="" type="hidden"/>
             <button type="submit">Envoyer <span class="highlight">>></span></button>
           </form>
+          <script type="text/javascript" src="js/painting.js"></script>
+        <?php
+      } else if($lobbyStatus === 'guessing'){
+        include 'php/display-painting.php';
+      }else{echo '<span style="text-align:center">Pixelit ! Pixelart envoyé :)</span>';}
+        ?>
         </div>
 
-        <script type="text/javascript" src="js/painting.js"></script>
 
-        <div id="chat">
+        <div id="chatbox">
+          <div id="chat">
           <?php
           // Récupération des 10 derniers messages
-          $reponse = $bdd->prepare('SELECT pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID DESC LIMIT 0, 10');
+          $reponse = $bdd->prepare('SELECT ID, pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID DESC LIMIT 0, 10');
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
           $chatText = '';
           while ($donnees = $reponse->fetch()){
-            $strTxt = '';
+            $strTxt = '<p id='.$donnees['ID'].'>';
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              $strTxt = '<span class="highlight">' . htmlspecialchars($donnees['pseudo']) . ' :</span> ';
+              $strTxt .= '<span class="highlight">'.htmlspecialchars($donnees['pseudo']).' :</span> ';
             } else {
-              $strTxt = '<b>' . htmlspecialchars($donnees['pseudo']) . ' :</b> ';
+              $strTxt .= '<b>' . htmlspecialchars($donnees['pseudo']).' :</b> ';
             }
-            $strTxt .= htmlspecialchars($donnees['message']) . '<br/>';
+            $strTxt .= htmlspecialchars($donnees['message']).'</p>';
             $chatText = $strTxt.$chatText;
           }
           $reponse->closeCursor();
           echo $chatText;
           ?>
+          </div>
           <form action="post/msg_post.php" method="post">
-            <input type="text" name="message" placeholder="Propose ici..." autofocus/>
-            <input name="lobby" value=
-              <?php
-                echo '"'.$_SERVER['QUERY_STRING'].'"';
-              ?>
-            type="hidden" />
-            <button type="submit"
-            <?php
-              if($grid === $emptyGrid){echo 'DISABLED';}
-            ?>
-            ><span class="highlight">>></span></button>
+            <input id="message" type="text" name="message" maxlength="25" placeholder="Propose ici..." autofocus/>
+            <button id="send-message" type="submit"><span class="highlight">>></span></button>
           </form>
         </div>
+<script>
+$(document).ready(function(){
+    $('#send-message').click(function(e){
+        e.preventDefault(); // Empêche le bouton d'envoyer le formulaire
+        var message = encodeURIComponent( $('#message').val() );
+        if(message != ''){
+            $.ajax({
+                url : 'post/send-message.php',
+                type : 'POST',
+                data : 'message=' + message,
+                success : function(html){
+                  $('#message').val('');
+                }
+            });
+        }
+    });
+
+    function loadNewMessages(){
+        setTimeout( function(){
+            var premierID = $('#chat p:last').attr('id');
+            $.ajax({
+                url : "ajax/check-message.php?id=" + premierID,
+                type : 'GET',
+                success : function(html){
+                    $('#chat').append(html);
+                    //Compter si plus de 10 : on supprime
+                    while($('#chat').find('p').length > 10){
+                      $('#chat').find('p').eq(0).remove();
+                    }
+                }
+            });
+            loadNewMessages();
+        }, 1000);
+    }
+    loadNewMessages();
+});
+</script>
 
       </div>
     </body>

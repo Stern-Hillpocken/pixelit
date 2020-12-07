@@ -79,12 +79,13 @@ if($_SESSION['pseudo'] === $host){
 	}
 
 	// Pousser et passer en drawing phase
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', currentRound = :currentRound, currentWords = :currentWords  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', currentRound = :currentRound, teamShow = 0, startTime = 0, currentWords = :currentWords  WHERE name = :currentLobby');
 	$req->execute(array(
 		'currentRound' => $currentRound,
 		'currentWords' => $currentWordsString,
 	  'currentLobby' => $_SESSION['lobby']
 	  ));
+	$req->closeCursor();
 
 	// Pousser pour les joueurs : grid, guess, team
 	for($i = 0; $i < count($pseudo); $i++){
@@ -94,6 +95,7 @@ if($_SESSION['pseudo'] === $host){
 			'team' => $team[$i],
 		  'pseudo' => $pseudo[$i]
 		  ));
+		$req->closeCursor();
 	}
 }
 ?>

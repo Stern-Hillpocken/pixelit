@@ -7,7 +7,7 @@ try
 }
 catch(Exception $e)
 {
-        die('Erreur : '.$e->getMessage());
+  die('Erreur : '.$e->getMessage());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,16 @@ if(isset($_POST['pseudo'])){
 		$pseudo = substr($pseudo, 0, 25);
 	}
   // S'assurer qu'il n'est pas dans la BDD
-  // TODO
+	$reponse = $bdd->query('SELECT pseudo FROM users');
+	$allPseudo = array();
+	// Affichage
+	while ($donnees = $reponse->fetch()){
+		array_push($allPseudo,$donnees['pseudo']);
+	}
+	$reponse->closeCursor();
+	for($i = 0; $i < count($allPseudo); $i++){
+		if($pseudo === $allPseudo[$i]){$pseudo = '';}
+	}
   // Check
   if($pseudo !== ''){
     $_SESSION['pseudo'] = $pseudo;
@@ -42,7 +51,7 @@ if(isset($_POST['pseudo'])){
 // LOBBY
 ////////////////////////////////////////////////////////////////////////////////
 $lobby = $_POST['lobby'];
-if($lobby === '' || strlen($lobby) !== 8){
+if($lobby === '' || strlen($lobby) !== 8 AND isset($_SESSION['pseudo'])){
   $lobby = '';
   // Générer un nouveau lobby
   $chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -54,8 +63,8 @@ if($lobby === '' || strlen($lobby) !== 8){
 	//TODO
 	// Créer dans la BDD
 	$time = date("Y-m-d H:i:s");
-	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-	$req->execute(array($lobby, 'lobby', 0, 0, 0, '', 1, $time, '', $time));
+	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, teamShow, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+	$req->execute(array($lobby, 'lobby', 0, 0, 0, '', 0, 0, $time, '', $time));
 	$req->closeCursor();
 }
 

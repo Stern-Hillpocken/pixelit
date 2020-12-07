@@ -21,12 +21,12 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 if($_SESSION['pseudo'] === $host){
 
 	// Préparer les rounds et le temps
-	$rounds = $_POST['rounds'];
-	if($rounds === '' || $rounds < 1 || !is_int($rounds)){$rounds = 3;}
-	$timeDraw = $_POST['timeDraw'];
-	if($timeDraw === '' || $timeDraw < 5 || !is_int($timeDraw)){$timeDraw = 5;}
-	$timeAnswer = $_POST['timeAnswer'];
-	if($timeAnswer === '' || $timeAnswer < 5 || !is_int($timeAnswer)){$timeAnswer = 5;}
+	$rounds = intval($_POST['rounds']);
+	if($rounds === '' || $rounds < 1){$rounds = 3;}
+	$timeDraw = intval($_POST['timeDraw']);
+	if($timeDraw === '' || $timeDraw < 5){$timeDraw = 5;}
+	$timeAnswer = intval($_POST['timeAnswer']);
+	if($timeAnswer === '' || $timeAnswer < 5){$timeAnswer = 5;}
 
 	// Préparer les mots, plus de 8 mots
 	$words = $_POST['words'];
@@ -37,14 +37,13 @@ if($_SESSION['pseudo'] === $host){
 	$words = strtolower($words);
 
 	// Passer en game
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', rounds = :rounds, timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words, startTime = :startTime  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', rounds = :rounds, timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words  WHERE name = :currentLobby');
 	$req->execute(array(
 	  'currentLobby' => $_SESSION['lobby'],
 		'rounds' => $rounds,
 		'timeDraw' => $timeDraw,
 		'timeAnswer' => $timeAnswer,
-		'words' => $words,
-		'startTime' => date("Y-m-d H:i:s")
+		'words' => $words
 	  ));
 
 	// Commencer le round

@@ -10,7 +10,7 @@ catch(Exception $e)
   die('Erreur : '.$e->getMessage());
 }
 
-if(!empty($_GET['id']) AND isset($_SESSION['lobby'])){
+if(!empty($_GET['id']) AND isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
     $ID = (int) $_GET['id'];
 

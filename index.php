@@ -10,7 +10,7 @@ try {
 //GRID et HOST
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 	$reponse = $bdd->prepare('SELECT grid FROM users WHERE pseudo=:pseudo');
-	$reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
+	$reponse->execute(array('pseudo' => $_SESSION['pseudo']));
 	while ($donnees = $reponse->fetch()){
     $grid = $donnees['grid'];
 	}
@@ -67,24 +67,9 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <div id="head">
           <?php
           if($lobbyStatus === 'drawing'){
-            // Récupération des mots à deviner
-            $reponse = $bdd->prepare('SELECT currentWords FROM lobbies WHERE name=:currentLobby');
-            $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
-            $currentWords;
-            while ($donnees = $reponse->fetch()){
-              $currentWords = $donnees['currentWords'];
-            }
-            $reponse->closeCursor();
-            preg_match_all('/(\w+\s*\w+)(,|$)/', $currentWords, $out_preg);
-            $currentWordsArray = $out_preg[1];
-            // Récupération des scores
-            $reponse = $bdd->prepare('SELECT team FROM users WHERE pseudo=:pseudo ');
-            $reponse->execute(array(':pseudo' => $_SESSION['pseudo']));
-            // Affichage
-            while ($donnees = $reponse->fetch()){
-              echo $currentWordsArray[$donnees['team']];
-            }
-            $reponse->closeCursor();
+            $playerInvolved = $_SESSION['pseudo'];
+            include 'php/preg-currentWord.php';
+            echo $currentWord;
           }
           ?>
           <span id="clock">
@@ -98,12 +83,13 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
           // Affichage
           while ($donnees = $reponse->fetch()){
+            echo '<p><span title="Team">['.$donnees['team'].']</span> ';
             if($donnees['pseudo'] === $_SESSION['pseudo']){
-              echo '['.$donnees['team'].']'.'<span class="highlight">'. htmlspecialchars($donnees['pseudo']).' :</span> ';
+              echo '<span class="highlight">'. htmlspecialchars($donnees['pseudo']).' :</span> ';
             } else {
-              echo '['.$donnees['team'].']'.htmlspecialchars($donnees['pseudo']).' : ';
+              echo htmlspecialchars($donnees['pseudo']).' : ';
             }
-            echo $donnees['score'] . '<br/>';
+            echo '<span title="Points">'.$donnees['score'] . '</span></p>';
           }
           $reponse->closeCursor();
           ?>
@@ -167,6 +153,7 @@ $(document).ready(function(){
                 type : 'POST',
                 data : 'message=' + message,
                 success : function(html){
+                  $('#chat').append(html);
                   $('#message').val('');
                 }
             });
@@ -198,6 +185,8 @@ $(document).ready(function(){
     </body>
 </html>
 <?php
+} else if (isset($_SESSION['pseudo']) AND isset($_SESSION['pseudo']) AND $lobbyStatus === 'endscore') {
+  include('endscore.php');
 } else if (isset($_SESSION['pseudo'])) {
   include('lobby.php');
 } else {

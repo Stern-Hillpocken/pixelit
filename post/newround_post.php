@@ -20,11 +20,10 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
 if($_SESSION['pseudo'] === $host){
 	// Sélectionner les données
-	$reponse = $bdd->prepare('SELECT * FROM lobbies WHERE lobby=:lobby');
+	$reponse = $bdd->prepare('SELECT * FROM lobbies WHERE name=:lobby');
 	$reponse->execute(array(':lobby' => $_SESSION['lobby']));
 	while ($donnees = $reponse->fetch()){
 		$words = $donnees['words'];
-		$currentRound = $donnees['currentRound'];
 	}
 	$reponse->closeCursor();
 	// Nombre de joueurs
@@ -36,7 +35,6 @@ if($_SESSION['pseudo'] === $host){
 	}
 	$reponse->closeCursor();
 	// Modifier
-	$currentRound ++;
 	$nbTeam;
 	$compo = array();
 	for($i = 0; $i < count($pseudo); $i++){
@@ -79,9 +77,8 @@ if($_SESSION['pseudo'] === $host){
 	}
 
 	// Pousser et passer en drawing phase
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', currentRound = :currentRound, teamShow = 0, startTime = 0, currentWords = :currentWords  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', currentRound = currentRound+1, teamShow = 0, startTime = 0, currentWords = :currentWords WHERE name = :currentLobby');
 	$req->execute(array(
-		'currentRound' => $currentRound,
 		'currentWords' => $currentWordsString,
 	  'currentLobby' => $_SESSION['lobby']
 	  ));
@@ -89,7 +86,7 @@ if($_SESSION['pseudo'] === $host){
 
 	// Pousser pour les joueurs : grid, guess, team
 	for($i = 0; $i < count($pseudo); $i++){
-		$req = $bdd->prepare('UPDATE users SET grid = :grid, guess = \'\', team = :team  WHERE pseudo = :pseudo');
+		$req = $bdd->prepare('UPDATE users SET grid = :grid, guess = \'\', team = :team WHERE pseudo = :pseudo');
 		$req->execute(array(
 			'grid' => $emptyGrid,
 			'team' => $team[$i],

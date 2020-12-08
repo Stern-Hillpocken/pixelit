@@ -12,18 +12,27 @@ catch(Exception $e)
 
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
-  $requete = $bdd->prepare('SELECT startTime, timeDraw FROM lobbies WHERE name = :currentLobby');
+  $requete = $bdd->prepare('SELECT status, startTime, timeDraw, timeAnswer FROM lobbies WHERE name = :currentLobby');
   $requete->execute(array('currentLobby' => $_SESSION['lobby']));
 
+	$status = null;
   $startTime = null;
   $timeDraw = null;
+	$timeAnswer = null;
 
   while ($donnees = $requete->fetch()){
+		$status = $donnees['status'];
     $startTime = $donnees['startTime'];
     $timeDraw = $donnees['timeDraw'];
+		$timeAnswer = $donnees['timeAnswer'];
   }
   $requete->closeCursor();
 
-  echo strtotime($startTime).' '.$timeDraw; // retour à AJAX
+	if($status === 'drawing'){
+		echo strtotime($startTime).' '.$timeDraw; // retour à AJAX
+	} else {
+		echo strtotime($startTime).' '.$timeAnswer; // retour à AJAX
+	}
+
 }
 ?>

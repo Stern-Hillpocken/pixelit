@@ -4,6 +4,8 @@
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/style.css" />
         <link rel="icon" type="image/png" href="images/favicon.png" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <?php include 'ajax/check-lobby-status.php'; ?>
         <title>pixel it : score final</title>
     </head>
     <body>
@@ -14,9 +16,11 @@
         $reponse = $bdd->prepare('SELECT pseudo, score, team FROM users WHERE lobby=:currentLobby ORDER BY score DESC');
         $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
         $position = 1;
+        $prevScore = null;
         $tableScore = '<table>';
         // Affichage
         while ($donnees = $reponse->fetch()){
+          if($donnees['score'] === $prevScore){$position --;}
           $tableScore .= '<tr';
           if($position === 1){
             $tableScore .= ' style="border:4px solid red"';
@@ -32,16 +36,19 @@
             $tableScore .= htmlspecialchars($donnees['pseudo']);
           }
           $tableScore .= '</td><td><span title="Points">'.$donnees['score'] . '</span></td></tr>';
+          $prevScore = $donnees['score'];
           $position++;
         }
         $reponse->closeCursor();
         echo $tableScore.'</table>';
         ?>
-        <button onclick=""
-        <?php
-          if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
-        ?>
-        >Encore !</button>
+        <form action="post/restart_post.php" method="post">
+          <button type="submit"
+          <?php
+            if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
+          ?>
+          >Encore !</button>
+        </form>
     </div>
     </body>
     <footer>Version alpha !<br/>

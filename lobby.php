@@ -1,3 +1,13 @@
+<?php
+  $req = $bdd->prepare('SELECT rounds, timeDraw, timeAnswer FROM lobbies WHERE name = :currentLobby');
+  $req->execute(array('currentLobby' => $_SESSION['lobby']));
+  while($donnees = $req->fetch()){
+    $rounds = $donnees['rounds'];
+    $timeDraw = $donnees['timeDraw'];
+    $timeAnswer = $donnees['timeAnswer'];
+  }
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,17 +22,17 @@
       <h1>pixel it</h1>
       <div id="lobby">
         <form action="post/start_post.php" method="post">
-          <label for="rounds">Rounds :</label><input id="rounds" name="rounds" type="number" value="3" min="1" max="9"
+          <label for="rounds">Rounds :</label><input id="rounds" name="rounds" type="number" value="<?php echo $rounds; ?>" min="1" max="9"
           <?php
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>
           />
-          <label for="timeDraw">Temps pour finir son dessin (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="10" min="5" max="99"
+          <label for="timeDraw">Temps pour finir son dessin (secondes) :</label><input id="timeDraw" name="timeDraw" type="number" value="<?php echo $timeDraw; ?>" min="5" max="99"
           <?php
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>
           />
-          <label for="timeAnswer">Temps pour les propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="10" min="5" max="99"
+          <label for="timeAnswer">Temps pour les propositions (secondes) :</label><input id="timeAnswer" name="timeAnswer" type="number" value="<?php echo $timeAnswer; ?>" min="5" max="99"
           <?php
             if($_SESSION['pseudo'] !== $host){echo ' DISABLED';}
           ?>

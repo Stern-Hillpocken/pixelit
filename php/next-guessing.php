@@ -27,12 +27,14 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
   }
   $reponse->closeCursor();
 
+	$time = date("Y-m-d H:i:s");
+
 	if($_SESSION['pseudo'] === $host){
 
 		if($lobbyStatus === 'drawing'){
 			// Première fois
-			$req = $bdd->prepare('UPDATE lobbies SET status = \'guessing\', startTime = 0, teamShow = 0 WHERE name = :currentLobby');
-		  $req->execute(array('currentLobby' => $_SESSION['lobby']));
+			$req = $bdd->prepare('UPDATE lobbies SET status = \'guessing\', startTime = :startTime, teamShow = 0 WHERE name = :currentLobby');
+		  $req->execute(array('startTime' => $time, 'currentLobby' => $_SESSION['lobby']));
 		  $req->closeCursor();
 
 		} else {
@@ -60,8 +62,8 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
 				if($teamShowSplit[1] < $nbGroup){
 				// Encore des dessins ou indices
-				$req = $bdd->prepare('UPDATE lobbies SET teamShow = teamShow+1 WHERE name = :currentLobby');
-				$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
+				$req = $bdd->prepare('UPDATE lobbies SET teamShow = teamShow+1, startTime = :startTime WHERE name = :currentLobby');
+				$req->execute(array('startTime' => $time, 'currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
 				$req->closeCursor();
 				}else{
 					// Plus de dessins ou indices
@@ -69,7 +71,12 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 				}
 			}/*else*/
 			if($nbGuess >= 1){
-				// Le mot a été trouvé --> max(team) dans BDD (nb d'équipe)
+				// Le mot a été trouvé
+				// Supprimer les guess
+				$req = $bdd->prepare('UPDATE users SET guess = \'\' WHERE lobby = :currentLobby');
+				$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
+				$req->closeCursor();
+				// --> max(team) dans BDD (nb d'équipe)
 				$numMaxTeam = 0;
 				$req = $bdd->prepare('SELECT team FROM users WHERE lobby = :currentLobby');
 			  $req->execute(array('currentLobby' => $_SESSION['lobby']));
@@ -83,8 +90,8 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 				if($teamShowSplit[0] < $numMaxTeam){
 					// Encore des équipes
 					$newTeamShow = ($teamShowSplit[0]+1)*10;
-					$req = $bdd->prepare('UPDATE lobbies SET teamShow = :teamShow WHERE name = :currentLobby');
-					$req->execute(array('teamShow' => $newTeamShow,'currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
+					$req = $bdd->prepare('UPDATE lobbies SET teamShow = :teamShow, startTime = :startTime WHERE name = :currentLobby');
+					$req->execute(array('teamShow' => $newTeamShow, 'startTime' => $time, 'currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
 					$req->closeCursor();
 				}else{
 					// Plus d'équipe

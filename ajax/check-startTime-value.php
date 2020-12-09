@@ -13,7 +13,9 @@ $(document).ready(function(){
               var d = new Date();
               var n = d.getTime();
               var timeRemaining = startTime + maxTime - Math.floor(n/1000);
-              document.getElementById('time').textContent = timeRemaining;
+              if(timeRemaining >= 0){
+                document.getElementById('time').textContent = timeRemaining;
+              }
               if(timeRemaining === 0 && '<?php echo $lobbyStatus; ?>' === 'drawing'){
                 document.getElementById('sended-painting-form').submit();
               }
@@ -26,10 +28,11 @@ $(document).ready(function(){
                 });
               }
             }
-        }
+          }
     });
     setTimeout(loopCheckStartTimeValue, 1000);
   }
+
   loopCheckStartTimeValue();
 
 });

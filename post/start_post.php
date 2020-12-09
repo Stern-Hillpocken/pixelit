@@ -36,8 +36,13 @@ if($_SESSION['pseudo'] === $host){
 	}
 	$words = strtolower($words);
 
+	// Nettoyer les scores
+	$req = $bdd->prepare('UPDATE users SET score = 0 WHERE lobby = :currentLobby');
+	$req->execute(array('currentLobby' => $_SESSION['lobby']));
+	$req->closeCursor();
+
 	// Passer en game
-	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', rounds = :rounds, timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words  WHERE name = :currentLobby');
+	$req = $bdd->prepare('UPDATE lobbies SET status = \'drawing\', rounds = :rounds, timeDraw = :timeDraw, timeAnswer = :timeAnswer, words = :words, currentRound = 0 WHERE name = :currentLobby');
 	$req->execute(array(
 	  'currentLobby' => $_SESSION['lobby'],
 		'rounds' => $rounds,
@@ -45,6 +50,7 @@ if($_SESSION['pseudo'] === $host){
 		'timeAnswer' => $timeAnswer,
 		'words' => $words
 	  ));
+	$req->closeCursor();
 
 	// Commencer le round
 	include 'newround_post.php';

@@ -2,7 +2,7 @@
 session_start();
 // Connexion à la base de données
 try {
-  $bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
+  $bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 } catch(Exception $e) {
         die('Erreur : '.$e->getMessage());
 }
@@ -30,10 +30,12 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 // Est-on en jeu ?
 $lobbyStatus = '';
 if(isset($_SESSION['pseudo'])){
-  $reponse = $bdd->prepare('SELECT status FROM lobbies WHERE name=:currentLobby');
+  $reponse = $bdd->prepare('SELECT status, startTime, teamShow FROM lobbies WHERE name=:currentLobby');
   $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
   while ($donnees = $reponse->fetch()){
     $lobbyStatus = $donnees['status'];
+    $startTime = $donnees['startTime'];
+    $teamShow = $donnees['teamShow'];
   }
   $reponse->closeCursor();
 }
@@ -60,6 +62,7 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <?php include 'ajax/check-lobby-status.php'; ?>
         <?php include 'ajax/check-startTime-value.php'; ?>
+        <?php include 'ajax/check-teamShow.php'; ?>
         <title>pixel it - en jeu !</title>
     </head>
     <body>
@@ -73,11 +76,18 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           }
           ?>
           <span id="clock">
-            <img src="images/clock.png"/><span id="time"></span>
+            <img src="images/clock.png"/><span id="time" title="Temps restant"></span>
           </span>
         </div>
         <div id="scoreboard">
           <?php
+          // Récupération du round
+          $reponse = $bdd->prepare('SELECT rounds, currentRound FROM lobbies WHERE name=:currentLobby');
+          $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
+          while ($donnees = $reponse->fetch()){
+            echo '<p style="text-align:center"><b>Round :</b> '.$donnees['currentRound'].'/'.$donnees['rounds'].'</p>';
+          }
+          $reponse->closeCursor();
           // Récupération des scores
           $reponse = $bdd->prepare('SELECT pseudo, score, team FROM users WHERE lobby=:currentLobby ORDER BY score DESC');
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));

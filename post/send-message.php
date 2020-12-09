@@ -33,6 +33,7 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby']) AND isset($_POST['me
 		$teamPseudo (array)
 		$teamShowSplit (array [team;phase])
 		$teamDisplayKey (array)
+		$isClueTime (bool)
 		*/
 		// Récupérer le mot
 		$playerInvolved = $teamPseudo[0];
@@ -57,10 +58,14 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby']) AND isset($_POST['me
 			$req->execute(array('pseudo' => $_SESSION['pseudo'])) or die(print_r($bdd->errorInfo()));
 			$req->closeCursor();
 			// Pour le/les dessinateur(s)
-			if($teamDisplayKey !== 'indice'){
-				for($i = 0; $i < count($teamDisplayKey); $i++){
+			if($isClueTime === false){
+				$lastTDK = $teamDisplayKey[count($teamDisplayKey)-1];
+				$currentTDValue = $teamGridPoints[$lastTDK];
+				$realKey = array();
+				$realKey = array_keys($teamGridPoints, $currentTDValue);
+				for($i = 0; $i < count($realKey); $i++){
 					$req = $bdd->prepare('UPDATE users SET score = score+1 WHERE pseudo = :pseudo');
-					$req->execute(array('pseudo' => $teamPseudo[$teamDisplayKey[$i]])) or die(print_r($bdd->errorInfo()));
+					$req->execute(array('pseudo' => $teamPseudo[$realKey[$i]])) or die(print_r($bdd->errorInfo()));
 					$req->closeCursor();
 				}
 			}

@@ -45,9 +45,17 @@ if($sortedPointsValue[0] === 0){
 }
 
 // $teamDisplayKey
+$teamDisplayKey = array();
+for($i = 0; $i <= $teamShowSplit[1]; $i++){// = for 0
+  if($i < count($sortedPointsValue)){//Pour quand indice, ne pas avoir le dernier
+    $teamDisplayKey = array_merge($teamDisplayKey,array_keys($teamGridPoints, $sortedPointsValue[$i]));
+  }
+  //$teamDisplayKey = array_keys($teamGridPoints, $sortedPointsValue[$teamShowSplit[1]]); //old
+}
+// $isClueTime
 if($teamShowSplit[1] < count($sortedPointsValue)){
-  $teamDisplayKey = array_keys($teamGridPoints, $sortedPointsValue[$teamShowSplit[1]]);
+  $isClueTime = false;
 }else{
-  $teamDisplayKey = 'indice';
+  $isClueTime = true;
 }
 ?>

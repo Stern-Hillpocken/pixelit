@@ -43,7 +43,7 @@ if($_SESSION['pseudo'] === $host){
 	}
 	$team = array();
 	while(count($compo) > 0){
-		$rand = random_int(0,count($compo)-1);
+		$rand = rand(0,count($compo)-1);
 		array_push($team, $compo[$rand]);
 		array_splice($compo, $rand, 1);
 	}
@@ -54,7 +54,7 @@ if($_SESSION['pseudo'] === $host){
 	//
 	$currentWords = array();
 	while(count($currentWords) < $nbTeam){
-		$rand = random_int(0,count($wordsArray)-1);
+		$rand = rand(0,count($wordsArray)-1);
 		array_push($currentWords, $wordsArray[$rand]);
 		array_splice($wordsArray, $rand, 1);
 	}

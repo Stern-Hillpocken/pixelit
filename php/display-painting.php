@@ -5,6 +5,15 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
   // Retourner le(s) tableau(x)
   $teamGridTable = '';
+  // Si c'est le mot de ton équipe
+  $isMyTeam = false;
+  for($i = 0; $i < count($teamPseudo); $i++){
+    if($teamPseudo[$i] === $_SESSION['pseudo']){$isMyTeam = true;}
+  }
+  if($isMyTeam === true AND $isClueTime === false){
+    $teamGridTable .= '<span class="highlight">/!\\ N\'écrivez rien</span> dans le chat car c\'est au tour de votre équipe d\'être présenté.<br/>Réfléchissez plutôt à un mot <span class="highlight">indice</span> si jamais personne ne trouve (le jeu vous dira quand l\'écrire dans le chat).<br/>';
+  }
+  //
   for($i = 0; $i < count($teamDisplayKey); $i ++){//Tous ceux qui ont fait le même nombre de points
     $teamGridTable .= '<div style="display:inline-block"><table class="painting-show">';
     for($r = 0; $r < 9; $r++){

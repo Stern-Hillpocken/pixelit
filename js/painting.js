@@ -19,9 +19,9 @@ function clearPainting(){
 
 function updatePainting(){
   //options
-  let optionsTable = '<img alt="erase" src="images/erase.png" style="cursor:pointer" onclick="clearPainting()"/>';
+  let optionsTable = '<img alt="erase" src="assets/erase.png" style="cursor:pointer" onclick="clearPainting()"/>';
   for(let i = 0; i < 3; i++){
-    optionsTable += ' <span style="position:relative;cursor:pointer"><img alt="'+colorValue[i]+'-color" src="images/'+colorValue[i]+'-color.png" onclick="changeColor('+i+')"';
+    optionsTable += ' <span style="position:relative;cursor:pointer"><img alt="'+colorValue[i]+'-color" src="assets/'+colorValue[i]+'-color.png" onclick="changeColor('+i+')"';
     if(i === colorInt){
       optionsTable += ' style="outline: 2px solid red"';
     }

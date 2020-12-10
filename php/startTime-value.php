@@ -30,8 +30,10 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
 	if($status === 'drawing'){
 		echo strtotime($startTime).' '.$timeDraw; // retour à AJAX
-	} else {
+	} else if $status === 'guessing'{
 		echo strtotime($startTime).' '.$timeAnswer; // retour à AJAX
+	} else {
+		echo strtotime($startTime).' '.'5'; // retour à AJAX
 	}
 
 }

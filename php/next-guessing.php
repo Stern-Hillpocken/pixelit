@@ -72,6 +72,17 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 			}/*else*/
 			if($nbGuess >= 1){
 				// Le mot a été trouvé
+				// Afficher la réponse
+				$req = $bdd->prepare('UPDATE lobbies SET status =\'showAnswer\' WHERE name = :currentLobby');
+				$req->execute(array('currentLobby' => $_SESSION['lobby']));
+				$req->closeCursor();
+				//header("Refresh:0; url=../index.php");
+				// Attendre un peu le débrief
+				sleep(5);
+				// Repartir
+				$req = $bdd->prepare('UPDATE lobbies SET status =\'guessing\' WHERE name = :currentLobby');
+				$req->execute(array('currentLobby' => $_SESSION['lobby']));
+				$req->closeCursor();
 				// Supprimer les guess
 				$req = $bdd->prepare('UPDATE users SET guess = \'\' WHERE lobby = :currentLobby');
 				$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));

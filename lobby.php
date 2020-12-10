@@ -12,14 +12,14 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="icon" type="image/png" href="images/favicon.png" />
+        <link rel="stylesheet" href="assets/style.css" />
+        <link rel="icon" type="image/png" href="assets/favicon.png" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <?php include 'ajax/check-lobby-status.php'; ?>
-        <title>pixel it : en attente...</title>
+        <title>pixelit : en attente...</title>
     </head>
     <body>
-      <h1>pixel it</h1>
+      <h1>pixel<span class="highlight">it</span></h1>
       <div id="lobby">
         <form action="post/start_post.php" method="post">
           <label for="rounds">Rounds :</label><input id="rounds" name="rounds" type="number" value="<?php echo $rounds; ?>" min="1" max="9"

@@ -2,14 +2,14 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="icon" type="image/png" href="images/favicon.png" />
+        <link rel="stylesheet" href="assets/style.css" />
+        <link rel="icon" type="image/png" href="assets/favicon.png" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <?php include 'ajax/check-lobby-status.php'; ?>
-        <title>pixel it : score final</title>
+        <title>pixelit : score final</title>
     </head>
     <body>
-      <h1>pixel it</h1>
+      <h1>pixel<span class="highlight">it</span></h1>
       <div id="endscore">
         <?php
         // Récupération des scores

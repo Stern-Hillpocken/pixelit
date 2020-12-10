@@ -48,7 +48,7 @@ for($i = 0; $i < 81; $i++){
 
 
 // Display choice...
-if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus === 'guessing')){
+if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus === 'guessing' OR $lobbyStatus === 'showAnswer')){
 ////////////////////////////////////////////////////////////////////////////////
 // SESSION
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,13 +57,13 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
 <html>
     <head>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="icon" type="image/png" href="images/favicon.png" />
+        <link rel="stylesheet" href="assets/style.css" />
+        <link rel="icon" type="image/png" href="assets/favicon.png" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <?php include 'ajax/check-lobby-status.php'; ?>
         <?php include 'ajax/check-startTime-value.php'; ?>
         <?php include 'ajax/check-teamShow.php'; ?>
-        <title>pixel it - en jeu !</title>
+        <title>pixelit - en jeu !</title>
     </head>
     <body>
       <div id="ingame">
@@ -73,10 +73,15 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
             $playerInvolved = $_SESSION['pseudo'];
             include 'php/preg-currentWord.php';
             echo $currentWord;
+          } else if($lobbyStatus === 'showAnswer'){
+            include 'php/guessing-values.php';
+            $playerInvolved = $teamPseudo[0];
+            include 'php/preg-currentWord.php';
+            echo $currentWord;
           }
           ?>
           <span id="clock">
-            <img src="images/clock.png"/><span id="time" title="Temps restant"></span>
+            <img src="assets/clock.png"/><span id="time" title="Temps restant"></span>
           </span>
         </div>
         <div id="scoreboard">
@@ -118,9 +123,9 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           </form>
           <script type="text/javascript" src="js/painting.js"></script>
         <?php
-      } else if($lobbyStatus === 'guessing'){
+      } else if($lobbyStatus === 'guessing' OR $lobbyStatus === 'showAnswer'){
         include 'php/display-painting.php';
-      }else{echo '<span style="text-align:center">Pixelit ! Pixelart envoyé :)</span>';}
+      }else{echo '<span style="text-align:center">Pixelit ! Pixel art envoyé :)</span>';}
         ?>
         </div>
 

@@ -9,7 +9,7 @@ while ($donnees = $requete->fetch()){
 }
 $requete->closeCursor();
 
-$teamShowSplit = array(intval(floor($teamShow/10)), intval(($teamShow/10-floor($teamShow/10))*10));
+$teamShowSplit = array(intval(floor($teamShow/10)), intval($teamShow-floor($teamShow/10)*10));
 
 $requete = $bdd->prepare('SELECT pseudo, grid FROM users WHERE lobby = :currentLobby AND team = :currentTeam ORDER BY ID');
 $requete->execute(array('currentLobby' => $_SESSION['lobby'], 'currentTeam' => $teamShowSplit[0]));

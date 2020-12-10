@@ -1,14 +1,7 @@
 <?php
 session_start();
 // Connexion à la base de données
-try
-{
-	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-}
-catch(Exception $e)
-{
-  die('Erreur : '.$e->getMessage());
-}
+include '../php/bdd-connexion.php';
 
 ////////////////////////////////////////////////////////////////////////////////
 // LOGIN

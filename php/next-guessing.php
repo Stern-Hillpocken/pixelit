@@ -1,14 +1,7 @@
 <?php
 session_start();
 // Connexion à la base de données
-try
-{
-	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-}
-catch(Exception $e)
-{
-  die('Erreur : '.$e->getMessage());
-}
+include 'bdd-connexion.php';
 
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 
@@ -73,62 +66,9 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 			if($nbGuess >= 1){
 				// Le mot a été trouvé
 				// Afficher la réponse
-				$req = $bdd->prepare('UPDATE lobbies SET status =\'showAnswer\' WHERE name = :currentLobby');
-				$req->execute(array('currentLobby' => $_SESSION['lobby']));
+				$req = $bdd->prepare('UPDATE lobbies SET status =\'showAnswer\', startTime = :startTime WHERE name = :currentLobby');
+				$req->execute(array('startTime' => $time, 'currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
 				$req->closeCursor();
-				//header("Refresh:0; url=../index.php");
-				// Attendre un peu le débrief
-				sleep(5);
-				// Repartir
-				$req = $bdd->prepare('UPDATE lobbies SET status =\'guessing\' WHERE name = :currentLobby');
-				$req->execute(array('currentLobby' => $_SESSION['lobby']));
-				$req->closeCursor();
-				// Supprimer les guess
-				$req = $bdd->prepare('UPDATE users SET guess = \'\' WHERE lobby = :currentLobby');
-				$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
-				$req->closeCursor();
-				// --> max(team) dans BDD (nb d'équipe)
-				$numMaxTeam = 0;
-				$req = $bdd->prepare('SELECT team FROM users WHERE lobby = :currentLobby');
-			  $req->execute(array('currentLobby' => $_SESSION['lobby']));
-				while($donnees = $req->fetch()){
-					if(intval($donnees['team']) > $numMaxTeam){
-						$numMaxTeam = intval($donnees['team']);
-					}
-				}
-				$req->closeCursor();
-
-				if($teamShowSplit[0] < $numMaxTeam){
-					// Encore des équipes
-					$newTeamShow = ($teamShowSplit[0]+1)*10;
-					$req = $bdd->prepare('UPDATE lobbies SET teamShow = :teamShow, startTime = :startTime WHERE name = :currentLobby');
-					$req->execute(array('teamShow' => $newTeamShow, 'startTime' => $time, 'currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
-					$req->closeCursor();
-				}else{
-					// Plus d'équipe
-					// Vérifier les rounds
-					$rounds = null;
-					$currentRound = null;
-					$req = $bdd->prepare('SELECT rounds, currentRound FROM lobbies WHERE name = :currentLobby');
-					$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
-					while($donnees = $req->fetch()){
-						$rounds = intval($donnees['rounds']);
-						$currentRound = intval($donnees['currentRound']);
-					}
-					$req->closeCursor();
-
-					if($currentRound < $rounds){
-						// Encore des rounds
-						include '../post/newround_post.php';
-					} else {
-						// Plus de rounds
-						$req = $bdd->prepare('UPDATE lobbies SET status = \'endscore\' WHERE name = :currentLobby');
-						$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
-						$req->closeCursor();
-					}
-
-				}
-
 			}
 
 		}

@@ -1,11 +1,7 @@
 <?php
 session_start();
 // Connexion à la base de données
-try {
-  $bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-} catch(Exception $e) {
-        die('Erreur : '.$e->getMessage());
-}
+include 'php/bdd-connexion.php';
 
 //GRID et HOST
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
@@ -77,7 +73,7 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
             include 'php/guessing-values.php';
             $playerInvolved = $teamPseudo[0];
             include 'php/preg-currentWord.php';
-            echo $currentWord;
+            echo 'Réponse : '.$currentWord;
           }
           ?>
           <span id="clock">

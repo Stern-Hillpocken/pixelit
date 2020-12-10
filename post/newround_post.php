@@ -1,14 +1,8 @@
 <?php
 session_start();
 // Connexion à la base de données
-try
-{
-	$bdd = new PDO('mysql:host=localhost;dbname=pixelit_database;charset=utf8', 'root', '');
-}
-catch(Exception $e)
-{
-        die('Erreur : '.$e->getMessage());
-}
+include '../php/bdd-connexion.php';
+
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
 	$reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:lobby ORDER BY ID LIMIT 0,1');
 	$reponse->execute(array(':lobby' => $_SESSION['lobby']));

@@ -19,13 +19,21 @@ $(document).ready(function(){
               if(timeRemaining === 0 && '<?php echo $lobbyStatus; ?>' === 'drawing'){
                 document.getElementById('sended-painting-form').submit();
               }
-              if(timeRemaining === -1 && '<?php echo $_SESSION['pseudo']; ?>' === '<?php echo $host; ?>'){
+              if(timeRemaining <= -1 && '<?php echo $_SESSION['pseudo']; ?>' === '<?php echo $host; ?>'){
                 //On passe en guessing
-                $.ajax({
-                    url : 'php/next-guessing.php',
-                    type : 'GET',
-                    data : false
-                });
+                if('<?php echo $lobbyStatus; ?>' === 'drawing' || '<?php echo $lobbyStatus; ?>' === 'guessing'){
+                  $.ajax({
+                      url : 'php/next-guessing.php',
+                      type : 'GET',
+                      data : false
+                  });
+                } else {
+                  $.ajax({
+                      url : 'php/next-guessing-next.php',
+                      type : 'GET',
+                      data : false
+                  });
+                }
               }
             }
           }

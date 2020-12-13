@@ -66,6 +66,11 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
         }
         $req->closeCursor();
 
+				// Supprimer les messages
+				$req = $bdd->prepare('DELETE FROM minichat WHERE lobby = :currentLobby');
+        $req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
+        $req->closeCursor();
+
         if($currentRound < $rounds){
           // Encore des rounds
           include '../post/newround_post.php';

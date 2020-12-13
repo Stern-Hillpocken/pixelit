@@ -5,17 +5,18 @@ include 'php/bdd-connexion.php';
 
 //GRID et HOST
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
-	$reponse = $bdd->prepare('SELECT grid FROM users WHERE pseudo=:pseudo');
+	$reponse = $bdd->prepare('SELECT grid, team FROM users WHERE pseudo=:pseudo');
 	$reponse->execute(array('pseudo' => $_SESSION['pseudo']));
 	while ($donnees = $reponse->fetch()){
     $grid = $donnees['grid'];
+		$team = $donnees['team'];
 	}
   if($_SESSION['lobby'] !== $_SERVER['QUERY_STRING']){// On le rebascule sur son lobby
     header('Location: ./?'.$_SESSION['lobby']);
   }
 	$reponse->closeCursor();
 
-	$reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby=:lobby ORDER BY ID LIMIT 0,1');
+	$reponse = $bdd->prepare('SELECT pseudo, team FROM users WHERE lobby=:lobby ORDER BY ID LIMIT 0,1');
 	$reponse->execute(array(':lobby' => $_SESSION['lobby']));
 	while ($donnees = $reponse->fetch()){
 		$host = $donnees['pseudo'];
@@ -108,7 +109,7 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
 
 
         <div id="draw">
-        <?php if($grid === $emptyGrid){ ?>
+        <?php if($lobbyStatus === 'drawing' AND $grid === $emptyGrid){ ?>
           <div id="painting-options"></div>
           <table id="painting">
           </table>
@@ -119,9 +120,11 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           </form>
           <script type="text/javascript" src="js/painting.js"></script>
         <?php
+      } else if($lobbyStatus === 'drawing' AND $grid !== $emptyGrid){
+        echo 'Pixelit ! Pixel art envoyé :)';
       } else if($lobbyStatus === 'guessing' OR $lobbyStatus === 'showAnswer'){
         include 'php/display-painting.php';
-      }else{echo '<span style="text-align:center">Pixelit ! Pixel art envoyé :)</span>';}
+      }else{echo '...';}
         ?>
         </div>
 
@@ -129,6 +132,8 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <div id="chatbox">
           <div id="chat">
           <?php
+					include 'php/guessing-values.php';
+					// return isClueTime (bool)
           // Récupération des 10 derniers messages
           $reponse = $bdd->prepare('SELECT ID, pseudo, message FROM minichat WHERE lobby=:currentLobby ORDER BY ID DESC LIMIT 0, 10');
           $reponse->execute(array(':currentLobby' => $_SERVER['QUERY_STRING']));
@@ -149,8 +154,12 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           ?>
           </div>
           <form action="post/msg_post.php" method="post">
-            <input id="message" type="text" name="message" maxlength="25" placeholder="Propose ici..." autofocus/>
-            <button id="send-message" type="submit"><span class="highlight">>></span></button>
+            <input id="message" type="text" name="message" maxlength="25" placeholder="-Propose ici..."/>
+            <button id="send-message" type="submit"<?php
+							if(intval($team) === intval(floor($teamShow/10)) AND $lobbyStatus === 'guessing' AND $isClueTime === false){
+								echo ' DISABLED';
+							}
+						?>><span class="highlight">>></span></button>
           </form>
         </div>
 <script>
@@ -186,7 +195,7 @@ $(document).ready(function(){
                 }
             });
             loadNewMessages();
-        }, 1000);
+        }, 2000);
     }
     loadNewMessages();
 });

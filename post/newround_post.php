@@ -49,7 +49,7 @@ if($_SESSION['pseudo'] === $host){
 	}
 	// Passer $words en tableau
 	$wordsArray = array();
-	preg_match_all('/(\w+\s*\w+)(,|$)/', $words, $out_preg);
+	preg_match_all('/(\w+\s*\w+)\s*(,|$)/u', $words, $out_preg);
 	$wordsArray = $out_preg[1];
 	//
 	$currentWords = array();

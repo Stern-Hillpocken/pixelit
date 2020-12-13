@@ -34,7 +34,7 @@ if($_SESSION['pseudo'] === $host){
 		$words = $_POST['words'];
 		preg_match_all('/(\w+\s*\w+)(,|$)/', $words, $out_preg);
 		if(count($out_preg[1]) < 8 OR (isset($_POST['add-words']) AND $_POST['add-words'] === 'checked')){
-			$words .= ', champignon, bamboo, pinocchio, serpent, main, oeil, stylo, souris';
+			$words .= ', bambou, pinocchio, serpent, oeil, stylo, souris, échec, biberon, poule, skateboard, vache, choppe, soleil, voiture, parapluie, scie, poisson, chat, ampoule, fleur, téléphone, oeuf, arc, étoile, vélo, casserole, nez, arbre, monocle, lunettes, prise';
 		}
 		$words = strtolower($words);
 

@@ -7,7 +7,7 @@ while ($donnees = $reponse->fetch()){
   $currentWords = $donnees['currentWords'];
 }
 $reponse->closeCursor();
-preg_match_all('/(\w+\s*\w+)(,|$)/', $currentWords, $out_preg);
+preg_match_all('/(\w+\s*\w+)\s*(,|$)/u', $currentWords, $out_preg);
 $currentWordsArray = $out_preg[1];
 // Récupération des scores
 $reponse = $bdd->prepare('SELECT team FROM users WHERE pseudo=:pseudo ');

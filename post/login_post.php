@@ -46,13 +46,17 @@ if(isset($_POST['pseudo'])){
 $lobby = $_POST['lobby'];
 
 // Check if lobbyExist
-$lobbyExist = 'false';
-$req = $bdd->query('SELECT name FROM lobbies');
+$lobbyExist = false;
+$lobbyWaiting = false;
+$req = $bdd->query('SELECT name, status FROM lobbies');
 while($donnees = $req->fetch()){
-	if($donnees['name'] === $lobby){$lobbyExist = 'true';}
+	if($donnees['name'] === $lobby){
+    $lobbyExist = true;
+    if($donnees['status'] === 'lobby'){$lobbyWaiting === true;}
+  }
 }
 
-if(($lobby === '' || strlen($lobby) !== 8 || $lobbyExist === 'false') AND isset($_SESSION['pseudo'])){
+if(($lobby === '' || strlen($lobby) !== 8 || $lobbyExist === false || $lobbyWaiting === false) AND isset($_SESSION['pseudo'])){
   $lobby = '';
   // Générer un nouveau lobby
   $chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];

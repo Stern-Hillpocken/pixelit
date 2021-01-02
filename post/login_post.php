@@ -52,7 +52,7 @@ $req = $bdd->query('SELECT name, status FROM lobbies');
 while($donnees = $req->fetch()){
 	if($donnees['name'] === $lobby){
     $lobbyExist = true;
-    if($donnees['status'] === 'lobby'){$lobbyWaiting === true;}
+    if($donnees['status'] === 'lobby'){$lobbyWaiting = true;}
   }
 }
 

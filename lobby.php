@@ -77,14 +77,20 @@ $(document).ready(function(){
           loadNewPlayersInLobby();
 });
 
-function copyLink(){
+/*function copyLink(){
   navigator.clipboard.writeText(document.getElementById('link-to-copy').innerText);
+}*/
+function copyLink() {
+  var copyText = document.getElementById('link-to-copy');
+  copyText.select();
+  copyText.setSelectionRange(0, 99999)
+  document.execCommand('copy');
 }
         </script>
         <p style="width:100%; text-align:center">
           Lien vers le lobby :<br/>
-          <span class="highlight" id="link-to-copy"><?php echo $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']; ?></span>
-
+          <!--<span class="highlight"><?php echo $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']; ?></span>-->
+          <input style="color:red;text-align:center;" type="text" value="<?php echo $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']; ?>" id="link-to-copy">
           <span class="pseudo-button" onclick="copyLink()"><svg viewBox="0 0 24 24">
     <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" /></svg> Copier</span>
         </p>

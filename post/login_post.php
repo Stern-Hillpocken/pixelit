@@ -16,16 +16,14 @@ if(isset($_POST['pseudo'])){
 		$pseudo = substr($pseudo, 0, 25);
 	}
   // S'assurer qu'il n'est pas dans la BDD
-	$reponse = $bdd->query('SELECT pseudo FROM users');
-	$allPseudo = array();
-	// Affichage
+	$reponse = $bdd->prepare('SELECT pseudo FROM users WHERE lobby = ?');
+  $reponse->execute(array($_POST['lobby']));
 	while ($donnees = $reponse->fetch()){
-		array_push($allPseudo,$donnees['pseudo']);
+		if($donnees['pseudo'] === $pseudo){
+      $pseudo = '';
+    }
 	}
 	$reponse->closeCursor();
-	for($i = 0; $i < count($allPseudo); $i++){
-		if($pseudo === $allPseudo[$i]){$pseudo = '';}
-	}
   // Check
   if($pseudo !== ''){
     $_SESSION['pseudo'] = $pseudo;
@@ -55,17 +53,31 @@ while($donnees = $req->fetch()){
     if($donnees['status'] === 'lobby'){$lobbyWaiting = true;}
   }
 }
+$req->closeCursor();
 
 if(($lobby === '' || strlen($lobby) !== 8 || $lobbyExist === false || $lobbyWaiting === false) AND isset($_SESSION['pseudo'])){
-  $lobby = '';
   // Générer un nouveau lobby
   $chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  while(strlen($lobby) < 8){
-    $randomChar = rand(0, count($chars)-1);
-    $lobby.=$chars[$randomChar];
+  $lobbyCreationExist = true;
+  while($lobbyCreationExist === true){
+    $lobbyCreationExist = false;
+    //Créer
+    $lobby = '';
+    while(strlen($lobby) < 8){
+      $randomChar = rand(0, count($chars)-1);
+      $lobby.=$chars[$randomChar];
+    }
+  	// S'assurer que le lobby n'est pas dans la BDD
+  	$req = $bdd->query('SELECT name FROM lobbies');
+    while($donnees = $req->fetch()){
+    	if($donnees['name'] === $lobby){
+        $lobbyCreationExist = true;
+        break;
+      }
+    }
+    $req->closeCursor();
   }
-	// S'assurer qu'il n'est pas dans la BDD
-	//TODO
+
 	// Créer dans la BDD
 	$time = date("Y-m-d H:i:s");
 	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, teamShow, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
@@ -75,7 +87,7 @@ if(($lobby === '' || strlen($lobby) !== 8 || $lobbyExist === false || $lobbyWait
 
 // Y mettre le joueur
 if(isset($_SESSION['pseudo'])){
-	$req = $bdd->prepare('UPDATE users SET lobby = :lobby WHERE pseudo = :pseudo');
+	$req = $bdd->prepare('UPDATE users SET lobby = :lobby WHERE pseudo = :pseudo order by ID desc limit 1');
 	$req->execute(array(
 	  'lobby' => $lobby,
 	  'pseudo' => $_SESSION['pseudo']

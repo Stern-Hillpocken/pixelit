@@ -202,6 +202,7 @@ $(document).ready(function(){
 </script>
 
       </div>
+			<?php include('php/disconnection.php') ?>
     </body>
 </html>
 <?php

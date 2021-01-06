@@ -15,6 +15,10 @@
   cursor: help;
 }
 
+[onclick]{
+  cursor: pointer;
+}
+
 a{
   color: red;
   font-weight: bold;
@@ -92,6 +96,12 @@ details[open] summary:after {
 }
 details:hover summary:after,  details[open]:hover summary:after{
    color: white;
+}
+
+svg{
+  height: 24px;
+  width: 24px;
+  vertical-align: middle;
 }
 
 textarea{
@@ -229,6 +239,12 @@ top: -32px;
   padding: 8px;
 }
 
+#disconnection{
+  bottom: 0;
+  left: 0;
+  position: fixed;
+}
+
 .color-selected{
   outline: 2px solid red;
 }
@@ -243,6 +259,26 @@ top: -32px;
 
 .highlight{
   color: red;
+}
+
+.pseudo-button{
+  background-color: black;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+}
+.pseudo-button svg path{
+  fill: red;
+}
+.pseudo-button:hover svg path{
+  fill: white;
+}
+.pseudo-button:hover{
+  background-color: red;
+  color: black;
+}
+.pseudo-button:hover svg{
+  color: white;
 }
 
 button:hover .highlight{
@@ -280,6 +316,10 @@ body{
 @media only screen and (min--moz-device-pixel-ratio: 1.5) {/*smartphone*/
 body{
   font-size: 4em;
+}
+svg{
+  height: 64px;
+  width: 64px;
 }
 #inscription, #lobby, #ingame, #endscore, footer{
   background-color: white;

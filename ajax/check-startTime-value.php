@@ -19,7 +19,7 @@ $(document).ready(function(){
               if(timeRemaining === 0 && '<?php echo $lobbyStatus; ?>' === 'drawing'){
                 document.getElementById('sended-painting-form').submit();
               }
-              if(timeRemaining === -2 && '<?php echo $_SESSION['pseudo']; ?>' === '<?php echo $host; ?>'){
+              if(timeRemaining <= -2 && '<?php echo $_SESSION['pseudo']; ?>' === '<?php echo $host; ?>'){
                 //On passe en guessing
                 if('<?php echo $lobbyStatus; ?>' === 'drawing' || '<?php echo $lobbyStatus; ?>' === 'guessing'){
                   $.ajax({

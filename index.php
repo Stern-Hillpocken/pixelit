@@ -154,7 +154,12 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
           ?>
           </div>
           <form action="post/msg_post.php" method="post">
-            <input id="message" type="text" name="message" maxlength="25" placeholder="-Propose ici..."/>
+            <input id="message" type="text" name="message" maxlength="25" placeholder="<?php
+							if($lobbyStatus === 'guessing'){echo '-Proposez ici...';}
+							else if(intval($team) === intval(floor($teamShow/10)) AND $lobbyStatus === 'guessing' AND $isClueTime === false){echo '-Attendez...';}
+							else if(intval($team) === intval(floor($teamShow/10)) AND $lobbyStatus === 'guessing' AND $isClueTime === true){echo '-Donnez un indice...';}
+							else{echo '-Discutez ici...';}
+							?>"/>
             <button id="send-message" type="submit"<?php
 							if(intval($team) === intval(floor($teamShow/10)) AND $lobbyStatus === 'guessing' AND $isClueTime === false){
 								echo ' DISABLED';

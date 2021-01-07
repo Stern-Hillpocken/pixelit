@@ -11,7 +11,7 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
     if($teamPseudo[$i] === $_SESSION['pseudo']){$isMyTeam = true;}
   }
   if($isMyTeam === true AND $isClueTime === false){
-    $teamGridTable .= '<span class="highlight">/!\\ N\'écrivez rien</span> dans le chat car c\'est au tour de votre équipe d\'être présenté.<br/>Réfléchissez plutôt à un mot <span class="highlight">indice</span> si jamais personne ne trouve (le jeu vous dira quand l\'écrire dans le chat).<br/>';
+    $teamGridTable .= '<span class="highlight">/!\\ N\'écrivez rien</span> dans le chat car c\'est au tour de votre équipe d\'être présentée.<br/>Réfléchissez plutôt à un mot <span class="highlight">indice</span> si jamais personne ne trouve (le jeu vous dira quand l\'écrire dans le chat).<br/>';
   }
   //
   for($i = 0; $i < count($teamDisplayKey); $i ++){//Tous ceux qui ont fait le même nombre de points

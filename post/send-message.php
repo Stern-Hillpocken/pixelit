@@ -45,6 +45,7 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby']) AND isset($_POST['me
 		$req->closeCursor();
 
 		// Il ne faut pas qu'on soit dans la team du mot et que ce soit le bon mot
+		$_POST['message'] = strtolower($_POST['message']);
 		if($playerInvolvedTeam !== $teamShowSplit[0] AND $_POST['message'] === $currentWord AND $playerInvolvedGuess !== 'true'){
 			// Pour le messager
 			$req = $bdd->prepare('UPDATE users SET score = score+1, guess = \'true\' WHERE pseudo = :pseudo');

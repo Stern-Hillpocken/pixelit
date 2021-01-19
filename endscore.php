@@ -50,6 +50,7 @@
           >Encore !</button>
         </form>
     </div>
+    <?php include('php/disconnection.php') ?>
     </body>
     <footer>Version alpha !<br/>
       Code source sur github <a href="https://github.com/Stern-Hillpocken/pixelit">>></a></footer>

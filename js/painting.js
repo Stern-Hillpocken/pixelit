@@ -51,7 +51,7 @@ function updatePainting(){
 }
 
 function paintColor(pos){
-  if(colorPool[colorInt] > 0){
+  if(colorPool[colorInt] > 0 || (colorInt === 1 && painting[pos] === '1')){
     //gain color
     if(painting[pos] === '1'){
       colorPool[1] ++;
@@ -60,11 +60,24 @@ function paintColor(pos){
     } else {
       colorPool[0] ++;
     }
-    //loose color
-    painting = painting.substring(0, pos)+colorInt+painting.substring(pos+1, painting.length);
-    colorPool[colorInt] --;
-    updatePainting();
+
+    if(colorInt === 1 && painting[pos] === '1'){
+      //black+black --> white
+      painting = painting.substring(0, pos)+'0'+painting.substring(pos+1, painting.length);
+      colorPool[0] --;
+    }else{
+      //loose color
+      painting = painting.substring(0, pos)+colorInt+painting.substring(pos+1, painting.length);
+      colorPool[colorInt] --;
+    }
+
+  } else if (colorInt === 2){//no colorPool but red
+    //remove red
+    painting = painting.replace('2', '0');//once
+    //add red
+    painting = painting.substring(0, pos)+'2'+painting.substring(pos+1, painting.length);
   }
+  updatePainting();
 }
 
 function changeColor(i){

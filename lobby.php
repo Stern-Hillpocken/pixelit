@@ -97,4 +97,5 @@ function copyLink() {
       </div>
       <?php include('php/disconnection.php') ?>
     </body>
+    <?php include('php/footer.php') ?>
 </html>

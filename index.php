@@ -60,11 +60,15 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
         <?php include 'ajax/check-lobby-status.php'; ?>
         <?php include 'ajax/check-startTime-value.php'; ?>
         <?php include 'ajax/check-teamShow.php'; ?>
+				<?php if($lobbyStatus === 'guessing'){
+					echo '<script>var audio = new Audio(\'assets/new-painting.wav\'); audio.play();</script>';
+					//<audio autoplay><source src="assets/clock.wav" type="audio/x-wav">Your browser does not support the audio tag.</audio>
+				} ?>
         <title>pixelit - en jeu !</title>
     </head>
     <body>
       <div id="ingame">
-        <div id="head">
+        <div id="head" <?php if($lobbyStatus === 'showAnswer'){echo 'class="answer"';} ?> >
           <?php
           if($lobbyStatus === 'drawing'){
             $playerInvolved = $_SESSION['pseudo'];
@@ -77,9 +81,20 @@ if(isset($_SESSION['pseudo']) AND ($lobbyStatus === 'drawing' OR $lobbyStatus ==
             echo 'Réponse : '.$currentWord;
           }
           ?>
-          <span id="clock">
+          <span id="clock" <?php if($lobbyStatus === 'drawing' OR $lobbyStatus === 'showAnswer'){echo 'style="display:none"';} ?> >
             <img src="assets/clock.png"/><span id="time" title="Temps restant"></span>
           </span>
+					<?php
+						if($lobbyStatus === 'showAnswer'){
+							echo '<button ';
+							if($_SESSION['pseudo'] === $host){
+								echo 'onclick="window.location.assign(\'php/next-guessing-next.php\')"';
+							}else{
+								echo 'disabled';
+							}
+							echo '><span class="highlight">Suite...</span></button>';
+						}
+					?>
         </div>
         <div id="scoreboard">
           <?php
@@ -207,7 +222,6 @@ $(document).ready(function(){
 </script>
 
       </div>
-			<?php include('php/disconnection.php') ?>
     </body>
 </html>
 <?php

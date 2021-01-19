@@ -81,7 +81,7 @@ if(($lobby === '' || strlen($lobby) !== 8 || $lobbyExist === false || $lobbyWait
 	// Créer dans la BDD
 	$time = date("Y-m-d H:i:s");
 	$req = $bdd->prepare('INSERT INTO lobbies (name, status, rounds, timeDraw, timeAnswer, words, currentRound, teamShow, startTime, currentWords, lastTimestamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-	$req->execute(array($lobby, 'lobby', 3, 10, 20, '', 0, 0, $time, '', $time));
+	$req->execute(array($lobby, 'lobby', 3, 20, 30, '', 0, 0, $time, '', $time));
 	$req->closeCursor();
 }
 

@@ -5,12 +5,7 @@ include '../php/bdd-connexion.php';
 
 // Envoyer un message
 if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby']) AND isset($_POST['message']) AND !empty($_POST['message'])){
-	// Insertion du message à l'aide d'une requête préparée
-	$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
-	$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
-	$req->closeCursor();
-
-	// Si on est en mode guessing
+	// Récupérer le status
 	$req = $bdd->prepare('SELECT status FROM lobbies WHERE name = :currentLobby');
 	$req->execute(array('currentLobby' => $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
 	$status = null;
@@ -64,6 +59,11 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby']) AND isset($_POST['me
 				}
 			}
 			echo '<div id="word-finded">Trouvé : '.$currentWord.' !</div>';
+		}else{
+			// Insertion du message à l'aide d'une requête préparée
+			$req = $bdd->prepare('INSERT INTO minichat (pseudo, message, lobby) VALUES(?, ?, ?)');
+			$req->execute(array($_SESSION['pseudo'], $_POST['message'], $_SESSION['lobby'])) or die(print_r($bdd->errorInfo()));
+			$req->closeCursor();
 		}
 	}
 

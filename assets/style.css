@@ -177,6 +177,10 @@ footer{
   overflow: hidden;
   padding: 0px;
 }
+.answer{
+  background-color: black;
+  color: white;
+}
 #clock{
   display: inline;
   position: relative;

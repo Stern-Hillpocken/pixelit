@@ -88,4 +88,5 @@ if(isset($_SESSION['pseudo']) AND isset($_SESSION['lobby'])){
   }
 
 }
+header('Location: ./../');
 ?>

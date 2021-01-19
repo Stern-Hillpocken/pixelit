@@ -13,8 +13,17 @@ $(document).ready(function(){
               var d = new Date();
               var n = d.getTime();
               var timeRemaining = startTime + maxTime - Math.floor(n/1000);
+
               if(timeRemaining >= 0){
                 document.getElementById('time').textContent = timeRemaining;
+                //display clock
+                if('<?php echo $lobbyStatus; ?>' === 'drawing' && document.getElementById('clock').style.display === 'none'){
+                  document.getElementById('clock').style.display = 'inline';
+                  if('<?php echo $grid ?>' === '<?php echo $emptyGrid ?>'){//encore rien envoyé, son clock
+                    var audio = new Audio('assets/clock.wav');
+                    audio.play();
+                  }
+                }
               }
               if(timeRemaining === 0 && '<?php echo $lobbyStatus; ?>' === 'drawing'){
                 document.getElementById('sended-painting-form').submit();
@@ -27,13 +36,13 @@ $(document).ready(function(){
                       type : 'GET',
                       data : false
                   });
-                } else {
+                }/* else {
                   $.ajax({
                       url : 'php/next-guessing-next.php',
                       type : 'GET',
                       data : false
                   });
-                }
+                }*/
               }
             }
           }
